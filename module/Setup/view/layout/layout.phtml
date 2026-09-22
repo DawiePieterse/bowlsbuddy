@@ -9,12 +9,12 @@
         <link type="text/css" rel="stylesheet" href="<?= $this->basePath('css/default.min.css') ?>" media="all">
         <link type="text/css" rel="stylesheet" href="<?= $this->basePath('css-client/default.css') ?>" media="all">
         <?= $this->headLink() ?>
-        <?= $this->headTitle('ep-3 Bookingsystem Setup')->setSeparator(' &middot; ')->setAutoEscape(false) ?>
+        <?= $this->headTitle('Bowls Buddy Setup')->setSeparator(' &middot; ')->setAutoEscape(false) ?>
     </head>
 
     <body class="centered-text">
         <div style="margin-top: 32px;">
-            <img src="<?= $this->basePath($this->t('imgs/branding/ep3-bs-neg-en.png')) ?>" alt="<?= $this->t('ep-3 Bookingsystem') ?>" style="width: 256px;">
+            <h1><?= $this->t('Bowls Buddy') ?></h1>
         </div>
 
         <div class="padded centered-panel <?= $this->placeholder('panel') ?> left-text" style="margin-top: 32px;">
@@ -22,7 +22,7 @@
         </div>
 
         <div id="footer" style="margin-top: 32px;">
-            <?= $this->t('Created by') ?> <a href="https://bs.hbsys.de/" target="_blank"><?= $this->t('ep-3 Bookingsystem') ?></a>
+            <?= $this->t('Bowls Buddy') ?> <?= $this->t('Setup') ?>
         </div>
 
         <script type="text/javascript" src="<?= $this->basePath('js/jquery/jquery.min.js') ?>"></script>
