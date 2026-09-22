@@ -1,0 +1,21 @@
+# InfinityFree's free tier cannot set the Apache document root to /public,
+# which ep-3 Bookingsystem normally requires. This routes all requests
+# through public/ instead, while the rules below block direct web access
+# to the application source, config (DB credentials!) and data folders.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "\.(json|lock|md|sql)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>

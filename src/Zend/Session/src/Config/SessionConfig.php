@@ -402,7 +402,11 @@ class SessionConfig extends StandardConfig
         }
 
         if (! preg_match('#Registered save handlers.*#m', $this->getPhpInfoForModules(), $matches)) {
-            $this->knownSaveHandlers = [];
+            // phpinfo() is disabled on some hosts (e.g. shared hosting, for security).
+            // Fall back to the handler PHP itself is currently configured with, since
+            // a running PHP process always has a working save handler active.
+            $current = ini_get('session.save_handler');
+            $this->knownSaveHandlers = $current ? [$current] : ['files'];
             return $this->knownSaveHandlers;
         }
 
