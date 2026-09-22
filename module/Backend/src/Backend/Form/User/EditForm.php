@@ -114,8 +114,8 @@ class EditForm extends Form
             ),
             'options' => array(
                 'label' => 'Limit bookings',
-                'notes' => 'Leer lassen oder auf 0 setzen,<br />um die Einstellung des Platzes zu übernehmen',
-                'postfix' => 'gleichzeitig',
+                'notes' => 'Leave empty or set to 0,<br />to use the square\'s setting',
+                'postfix' => 'simultaneous bookings',
             ),
         ));
 

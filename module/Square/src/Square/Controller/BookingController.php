@@ -140,7 +140,7 @@ class BookingController extends AbstractActionController
 
             foreach ($playerNames as $playerName) {
                 if (strlen(trim($playerName['value'])) < 5 || ! str_contains(trim($playerName['value']), ' ')) {
-                    throw new RuntimeException('Die <b>vollständigen Vor- und Nachnamen</b> der anderen Spieler sind erforderlich');
+                    throw new RuntimeException('The <b>full first and last names</b> of the other players are required');
                 }
             }
         } else {

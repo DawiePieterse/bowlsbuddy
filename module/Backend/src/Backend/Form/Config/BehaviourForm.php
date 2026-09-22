@@ -98,8 +98,8 @@ class BehaviourForm extends Form
             ),
             'options' => array(
                 'label' => 'Limit bookings',
-                'notes' => 'Auf 0 setzen, um beliebig viele Buchungen zu erlauben;<br />kann pro Platz und pro Benutzer überschrieben werden',
-                'postfix' => 'gleichzeitige Buchung(en) pro Benutzer',
+                'notes' => 'Set to 0 to allow any number of bookings;<br />can be overridden per square and per user',
+                'postfix' => 'simultaneous booking(s) per user',
             ),
         ));
 
