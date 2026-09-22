@@ -1,0 +1,54 @@
+<?php
+
+$this->setup(array(
+    'title' => 'User-Administration',
+    'panel' => 'centered-panel large-sized',
+    'back' => true,
+    'links' => array(
+        'Booking-Administration' => $this->url('backend/booking'),
+        'Event-Administration' => $this->url('backend/event'),
+        'Configuration' => $this->url('backend/config'),
+    ),
+));
+
+?>
+
+<div style="position: relative">
+    <h1><?= $this->t('User-Administration') ?></h1>
+
+    <div style="position: absolute; top: 0.4rem; right: 0.4rem">
+        <p><a href="<?= $this->url('backend/user/edit') ?>" class="unlined gray"><span class="symbolic symbolic-plus"><?= $this->t('New user') ?></span></a></p>
+    </div>
+
+    <div class="separator-small"></div>
+
+    <p><?= $this->t('Here you can create, edit or delete the users of your system.') ?></p>
+
+    <div class="separator separator-line"></div>
+
+    <?= $this->partial('backend/user/index.search.phtml', ['search' => $this->search]) ?>
+
+    <div class="separator separator-line"></div>
+
+    <div class="centered-text" style="padding: 16px 0 16px 0;">
+
+        <?php if ($this->usersQueryNote): ?>
+        <div style="margin-bottom: 2rem; font-weight: 600">
+            <?= $this->usersQueryNote ?>:
+        </div>
+        <?php endif; ?>
+
+        <?php if ($this->users): ?>
+
+            <?= $this->backendUsersFormat($this->users, $this->search) ?>
+
+        <?php else: ?>
+
+            <?php if ($this->search): ?>
+                <p><span class="red"><?= sprintf($this->t('%sNo users found%s for this search'), '<b>', '</b>') ?></span></p>
+            <?php endif; ?>
+
+        <?php endif; ?>
+
+    </div>
+</div>

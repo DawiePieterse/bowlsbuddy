@@ -1,0 +1,9 @@
+The update instructions have been moved to
+
+UPDATE.md
+
+in the project directory.
+
+Or:
+
+https://github.com/tkrebs/ep3-bs/blob/master/UPDATE.md

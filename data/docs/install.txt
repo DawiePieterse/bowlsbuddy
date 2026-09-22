@@ -1,0 +1,9 @@
+The installation instructions have been moved to
+
+INSTALL.md
+
+in the project directory.
+
+Or:
+
+https://github.com/tkrebs/ep3-bs/blob/master/INSTALL.md
