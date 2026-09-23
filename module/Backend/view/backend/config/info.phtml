@@ -23,8 +23,6 @@ $this->headScript()->appendFile($this->basePath('js/tinymce/tinymce.setup.js'));
 
     <p><?= sprintf($this->t('Which text should appear on the info page (%s)?'), $this->option('subject.type')) ?></p>
 
-    <?= $this->backendInfo('i18n') ?>
-
     <div class="separator-small"></div>
 
     <form method="post" action="<?= $this->url('backend/config/info') ?>">
