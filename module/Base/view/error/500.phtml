@@ -15,7 +15,7 @@ $this->setup(array(
     <div class="separator"></div>
 
     <p class="gray">
-        <?= sprintf($this->t('Please %sdrop us a note%s in case of unexpected error messages, %s so that we can repair them quickly.'), '<a href="' . $this->option('client.website.contact') . '">', '</a>', '<br>'); ?>
+        <?= sprintf($this->t('Please %sdrop us a note%s in case of unexpected error messages, %s so that we can repair them quickly.'), '<a href="mailto:' . $this->option('client.contact.email') . '">', '</a>', '<br>'); ?>
     </p>
 
     <div class="separator"></div>
