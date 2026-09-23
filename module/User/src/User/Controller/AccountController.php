@@ -148,37 +148,9 @@ class AccountController extends AbstractActionController
                 $registrationData = $registrationForm->getData();
 
                 $meta = array();
-                $meta['gender'] = $registrationData['rf-gender'];
-
-                if (isset($registrationData['rf-lastname']) && $registrationData['rf-lastname']) {
-                    $meta['firstname'] = ucfirst($registrationData['rf-firstname']);
-                    $meta['lastname'] = ucfirst($registrationData['rf-lastname']);
-
-                    $alias = $meta['firstname'] . ' ' . $meta['lastname'];
-                } else {
-                    $meta['name'] = $registrationData['rf-firstname'];
-
-                    if ($meta['gender'] == 'male' || $meta['gender'] == 'female' || $meta['gender'] == 'family') {
-                        $meta['name'] = ucfirst($meta['name']);
-                    }
-
-                    $alias = $meta['name'];
-                }
-
-                $meta['street'] = $registrationData['rf-street'] . ' ' . $registrationData['rf-number'];
-                $meta['zip'] = $registrationData['rf-zip'];
-                $meta['city'] = $registrationData['rf-city'];
-                $meta['phone'] = $registrationData['rf-phone'];
-
-                if (! (isset($registrationData['rf-birthdate']) && preg_match('/^([ \,\-\.0-9\x{00c0}-\x{01ff}a-zA-Z]){4,}$/u', $registrationData['rf-birthdate']))) {
-                    $registrationData['rf-birthdate'] = null;
-                }
-
-                if (isset($registrationData['rf-birthdate']) && $registrationData['rf-birthdate']) {
-                    $meta['birthdate'] = $registrationData['rf-birthdate'];
-                }
-
                 $meta['locale'] = $this->config('i18n.locale');
+
+                $alias = str_pad(strstr($registrationData['rf-email1'], '@', true), 3, '_');
 
                 if ($this->option('service.user.activation') == 'immediate') {
                     $status = 'enabled';
