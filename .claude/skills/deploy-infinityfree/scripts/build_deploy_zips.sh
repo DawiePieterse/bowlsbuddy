@@ -31,7 +31,15 @@ cd "$REPO_ROOT"
 mkdir -p "$OUT_DIR"
 
 echo "==> composer install"
-composer install --ignore-platform-reqs --no-interaction
+# --prefer-dist asks composer to download plain source archives instead of git
+# clones. In this sandbox it doesn't actually help - GitHub's zipball dist
+# endpoint returns 403 through the environment's proxy, so composer silently
+# falls back to a full git clone per package regardless of this flag - but
+# it's still correct to ask for it explicitly rather than relying on whatever
+# preferred-install a given machine's global composer config happens to have.
+# The `*/.git/*` exclusion below is what actually keeps the .git history out
+# of approot.zip; don't remove it even if this flag starts working here.
+composer install --ignore-platform-reqs --prefer-dist --no-interaction
 
 echo "==> config/init.php (EP3_BS_DEV_TAG = $DEV_TAG)"
 cp config/init.php.dist config/init.php
@@ -67,30 +75,28 @@ fail=0
 approot_listing="$(unzip -l "$OUT_DIR/approot.zip")"
 htdocs_listing="$(unzip -l "$OUT_DIR/htdocs.zip")"
 
-if grep -q '\.git/' <<< "$approot_listing"; then
-    echo "FAIL: approot.zip still contains .git/ entries (vendor packages were probably git-cloned by composer - check composer config)" >&2
-    fail=1
-fi
+# check_zip <listing> present|absent <regex> <failure message>
+check_zip() {
+    local listing="$1" expect="$2" pattern="$3" message="$4"
+    local matched=0
+    grep -qE "$pattern" <<< "$listing" && matched=1
 
-if ! grep -q 'config/autoload/local\.php$' <<< "$approot_listing"; then
-    echo "FAIL: approot.zip is missing config/autoload/local.php" >&2
-    fail=1
-fi
+    if [[ ("$expect" == "present" && $matched -eq 0) || ("$expect" == "absent" && $matched -eq 1) ]]; then
+        echo "FAIL: $message" >&2
+        fail=1
+    fi
+}
 
-if ! grep -q 'config/init\.php$' <<< "$approot_listing"; then
-    echo "FAIL: approot.zip is missing config/init.php" >&2
-    fail=1
-fi
-
-if ! grep -qE '[[:space:]]\.htaccess$' <<< "$htdocs_listing"; then
-    echo "FAIL: htdocs.zip is missing .htaccess at its root" >&2
-    fail=1
-fi
-
-if grep -qE '\.htaccess_(original|alternative)$' <<< "$htdocs_listing"; then
-    echo "FAIL: htdocs.zip leaked .htaccess_original or .htaccess_alternative" >&2
-    fail=1
-fi
+check_zip "$approot_listing" absent '\.git/' \
+    "approot.zip still contains .git/ entries (vendor packages were probably git-cloned by composer - check composer config)"
+check_zip "$approot_listing" present 'config/autoload/local\.php$' \
+    "approot.zip is missing config/autoload/local.php"
+check_zip "$approot_listing" present 'config/init\.php$' \
+    "approot.zip is missing config/init.php"
+check_zip "$htdocs_listing" present '[[:space:]]\.htaccess$' \
+    "htdocs.zip is missing .htaccess at its root"
+check_zip "$htdocs_listing" absent '\.htaccess_(original|alternative)$' \
+    "htdocs.zip leaked .htaccess_original or .htaccess_alternative"
 
 approot_size=$(du -h "$OUT_DIR/approot.zip" | cut -f1)
 htdocs_size=$(du -h "$OUT_DIR/htdocs.zip" | cut -f1)

@@ -7,18 +7,20 @@ description: Deploy this repo (bowlsbuddy, a Zend Framework 2 PHP app) to its In
 
 ## Why this is a zip workflow, not FTP
 
-InfinityFree only offers FTP (no SSH, no Composer, no shell) - and from a Claude
-Code cloud/web session, outbound FTP does not work. This was confirmed by testing
-directly: even with `ftpupload.net` explicitly allowlisted in the environment's
-Network access settings, a raw CONNECT tunnel to port 21 gets accepted by the
-egress proxy (`200 Connection Established`) but never carries a single byte - the
-underlying egress fabric only actually carries TLS/HTTPS traffic. No Network
-access setting fixes this; don't spend time re-testing it per deploy.
+InfinityFree only offers FTP (no SSH, no Composer, no shell), and outbound FTP
+has not worked from any Claude Code cloud/web session tested so far: even with
+`ftpupload.net` explicitly allowlisted in the environment's Network access
+settings, a raw CONNECT tunnel to port 21 gets accepted by the egress proxy
+(`200 Connection Established`) but never carries a single byte - consistent
+with that egress fabric only actually carrying TLS/HTTPS traffic. If you're
+running somewhere that plain FTP does work from (a local machine, a different
+sandbox), just FTP the files across directly and skip the rest of this file.
 
-The workaround: build the deployment as two zip files, hand them to the user
-(they're the ones with a working browser session to InfinityFree), and have them
-upload + extract through InfinityFree's browser-based File Manager, which is
-plain HTTPS from their side and works fine.
+Otherwise, use this as the fallback: build the deployment as two zip files,
+hand them to the user (they're the ones with a working browser session to
+InfinityFree), and have them upload + extract through InfinityFree's
+browser-based File Manager, which is plain HTTPS from their side and works
+fine regardless of what the agent's own environment allows.
 
 ## Deploy target facts
 
@@ -74,19 +76,26 @@ carries the sanity checks that catch the ways this has silently broken before:
 .claude/skills/deploy-infinityfree/scripts/build_deploy_zips.sh /tmp/bowlsbuddy-deploy true   # or false for prod mode
 ```
 
-This does, in order: `composer install --ignore-platform-reqs --no-interaction`,
-builds `config/init.php` from the `.dist` with the chosen dev-tag value,
-generates `config/autoload/local.php` from the DB env vars (via a small PHP
-helper that never echoes secret values), renames `public/.htaccess_original` to
+This does, in order: `composer install --ignore-platform-reqs --prefer-dist
+--no-interaction`, builds `config/init.php` from the `.dist` with the chosen
+dev-tag value, generates `config/autoload/local.php` by filling in the DB
+placeholders in the repo's own `config/autoload/local.php.dist` (via a small
+PHP helper that never echoes secret values and stays in sync with the dist
+file instead of carrying its own copy), renames `public/.htaccess_original` to
 `public/.htaccess`, and zips everything into `approot.zip` (siblings) and
 `htdocs.zip` (webroot contents).
 
 **The one bug worth knowing about ahead of time**: this repo's `composer
 install` clones each vendor package with full git history (`.git/` and all),
-which bloats a naive `vendor/` zip from ~6MB to over 100MB. The script already
-excludes `*/.git/*` and checks the built zip has zero `.git/` entries before
-declaring success - if you ever rebuild this some other way, don't skip that
-exclusion, and don't trust a zip's size at a glance; verify it.
+which bloats a naive `vendor/` zip from ~6MB to over 100MB. `--prefer-dist`
+is there in case it ever helps, but as of writing it doesn't fix this in a
+Claude Code sandbox: GitHub's zipball dist endpoint returns `403 Could not
+authenticate against github.com` through this environment's proxy, so
+composer falls back to a full git clone per package regardless of the flag.
+The `*/.git/*` exclusion in the zip command is what actually keeps that
+history out - don't remove it, and don't trust a zip's size at a glance;
+the script verifies it for you, but if you ever rebuild this some other way,
+verify it yourself too.
 
 The script exits non-zero and refuses to declare success if any sanity check
 fails (missing `.htaccess`, leaked `.git/` entries, missing `local.php`/
