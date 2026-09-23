@@ -150,8 +150,6 @@ class AccountController extends AbstractActionController
                 $meta = array();
                 $meta['locale'] = $this->config('i18n.locale');
 
-                $alias = str_pad(strstr($registrationData['rf-email1'], '@', true), 3, '_');
-
                 if ($this->option('service.user.activation') == 'immediate') {
                     $status = 'enabled';
                 } else {
@@ -160,7 +158,7 @@ class AccountController extends AbstractActionController
 
                 $userManager = $serviceManager->get('User\Manager\UserManager');
 
-                $user = $userManager->create($alias, $status, $registrationData['rf-email1'], $registrationData['rf-pw1'], $meta);
+                $user = $userManager->create(null, $status, $registrationData['rf-email1'], $registrationData['rf-pw1'], $meta);
                 $user->set('last_ip', $_SERVER['REMOTE_ADDR']);
 
                 $userManager->save($user);
