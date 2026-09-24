@@ -25,7 +25,6 @@ $this->headScript()->appendFile($this->basePath('js/controller/user/settings.min
         .symbolic-user { padding-left: 32px; background-position: 6px 1px; }
         .symbolic-email { padding-left: 32px; background-position: 4px 3px; }
         .symbolic-pw { padding-left: 32px; background-position: 8px 2px; }
-        .symbolic-phone { padding-left: 32px; background-position: 5px 0; }
         .symbolic-cross { padding-left: 32px; background-position: 5px 1px; }
 
         .dark-gray { color: #666; }
@@ -70,44 +69,6 @@ $this->headScript()->appendFile($this->basePath('js/controller/user/settings.min
             echo '</p>';
 
             ?>
-        </div>
-    </div>
-
-    <div class="separator-small"></div>
-
-    <div class="sandbox">
-        <div class="symbolic symbolic-phone">
-            <div class="edit-label dark-gray"><?= $this->t('Update phone number') ?></div>
-
-            <div class="edit-panel">
-                <div class="separator-small"></div>
-
-                <?php
-
-                $form = $this->editPhoneForm;
-                $form->setAttribute('method', 'post');
-                $form->setAttribute('action', $this->url('user/settings', array(), array('query' => array('edit' => 'phone'))));
-                $form->prepare();
-
-                echo $this->form()->openTag($form);
-
-                ?>
-
-                <table class="default-table" style="margin: 0;">
-                    <tr>
-                        <td>
-                            <?= $this->formElement($form->get('epf-phone')) ?>
-                            <?= $this->formElementErrors($form->get('epf-phone')) ?>
-                            <?= $this->formElementNotes($form->get('epf-phone')) ?>
-                        </td>
-                        <td>
-                            <?= $this->formElement($form->get('epf-submit')) ?>
-                        </td>
-                    </tr>
-                </table>
-
-                <?= $this->form()->closeTag() ?>
-            </div>
         </div>
     </div>
 

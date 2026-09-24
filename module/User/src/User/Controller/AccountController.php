@@ -338,30 +338,6 @@ class AccountController extends AbstractActionController
 
         $editParam = $this->params()->fromQuery('edit');
 
-        /* Phone form */
-
-        $editPhoneForm = $formElementManager->get('User\Form\EditPhoneForm');
-
-        if ($this->getRequest()->isPost() && $editParam == 'phone') {
-            $editPhoneForm->setData($this->params()->fromPost());
-
-            if ($editPhoneForm->isValid()) {
-                $data = $editPhoneForm->getData();
-
-                $phone = $data['epf-phone'];
-
-                $user->setMeta('phone', $phone);
-                $userManager->save($user);
-
-                $this->flashMessenger()->addSuccessMessage(sprintf($this->t('Your %sphone number%s has been updated'),
-                    '<b>', '</b>'));
-
-                return $this->redirect()->toRoute('user/settings');
-            }
-        } else {
-            $editPhoneForm->get('epf-phone')->setValue($user->getMeta('phone'));
-        }
-
         /* Email form */
 
         $editEmailForm = $formElementManager->get('User\Form\EditEmailForm');
@@ -506,7 +482,6 @@ class AccountController extends AbstractActionController
 
         return array(
             'user' => $user,
-            'editPhoneForm' => $editPhoneForm,
             'editEmailForm' => $editEmailForm,
             'editNotificationsForm' => $editNotificationsForm,
             'editPasswordForm' => $editPasswordForm,
