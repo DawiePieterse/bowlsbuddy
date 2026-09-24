@@ -1,0 +1,117 @@
+<?php
+
+$date = $this->date;
+$title = sprintf('%s - %s', $this->option('client.name.full'), $this->dateFormat($date, IntlDateFormatter::FULL));
+
+$names = $this->calendarBookingNames();
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= $this->escapeHtml($title) ?></title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 24px; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1d1d1f; background: #FFF; font-size: 13px; }
+        .sheet { max-width: 800px; margin: 0 auto; }
+        .actions { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; }
+        .actions a, .actions button { font: inherit; font-size: 14px; padding: 10px 20px; border-radius: 8px; border: 1px solid #d2d2d7; background: #FFF; color: #1d1d1f; text-decoration: none; cursor: pointer; }
+        .actions button { background: #0071e3; border-color: #0071e3; color: #FFF; font-weight: 600; }
+        header { border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 18px; }
+        header .club { font-size: 13px; color: #6e6e73; text-transform: uppercase; letter-spacing: 1px; }
+        header h1 { margin: 4px 0 0; font-size: 24px; }
+        h2 { font-size: 17px; margin: 22px 0 8px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th:nth-child(1) { width: 70px; }
+        th:nth-child(2) { width: 150px; }
+        th:nth-child(3) { width: 30%; }
+        th, td { border: 1px solid #c7c7cc; padding: 8px 10px; text-align: left; vertical-align: top; }
+        th { background: #f2f2f7; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td.rink { font-weight: 700; width: 70px; }
+        td.time { width: 130px; white-space: nowrap; }
+        td.free { color: #8e8e93; font-style: italic; }
+        .closed { border: 2px solid #d70015; color: #d70015; font-weight: 700; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; }
+        footer { margin-top: 28px; color: #8e8e93; font-size: 11px; text-align: right; }
+        @media print {
+            body { padding: 0; }
+            .actions { display: none; }
+            section { break-inside: avoid; }
+            th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+<div class="sheet">
+
+    <div class="actions">
+        <a href="<?= $this->url('frontend') ?>"><?= $this->t('Back') ?></a>
+        <button type="button" onclick="window.print()"><?= $this->t('Print or save as PDF') ?></button>
+    </div>
+
+    <header>
+        <div class="club"><?= $this->escapeHtml($this->option('client.name.full')) ?> &middot; <?= $this->t('Rink bookings') ?></div>
+        <h1><?= $this->escapeHtml($this->dateFormat($date, IntlDateFormatter::FULL)) ?></h1>
+    </header>
+
+    <?php foreach ($this->greens as $green => $squares): ?>
+        <?php
+
+        $greenHasBookings = false;
+
+        foreach ($squares as $sid => $square) {
+            if (! empty($this->bookingsBySquare[$sid])) {
+                $greenHasBookings = true;
+            }
+        }
+
+        ?>
+        <section>
+            <h2><?= $this->escapeHtml(sprintf($this->t('Green %s'), $green)) ?></h2>
+
+            <?php if ($this->closed[$green]): ?>
+                <div class="closed"><?= $this->escapeHtml(sprintf($this->t('CLOSED - Green %s is closed on this day'), $green)) ?></div>
+            <?php endif; ?>
+
+            <?php if (! $this->closed[$green] || $greenHasBookings): ?>
+                <table>
+                    <tr>
+                        <th><?= $this->t('Rink') ?></th>
+                        <th><?= $this->t('Time') ?></th>
+                        <th><?= $this->t('Booked by') ?></th>
+                        <th><?= $this->t('Other players') ?></th>
+                    </tr>
+
+                    <?php foreach ($squares as $sid => $square): ?>
+                        <?php if (empty($this->bookingsBySquare[$sid])): ?>
+                            <?php if (! $this->closed[$green]): ?>
+                                <tr>
+                                    <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
+                                    <td class="time"><?= $this->timeFormat(substr($square->need('time_start'), 0, 5)) ?> - <?= $this->timeFormat(substr($square->need('time_end'), 0, 5), true, null, true) ?></td>
+                                    <td class="free" colspan="2"><?= $this->t('Free') ?></td>
+                                </tr>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <?php foreach ($this->bookingsBySquare[$sid] as $entry): ?>
+                                <?php $players = $names->names($entry['booking']); ?>
+                                <tr>
+                                    <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
+                                    <td class="time"><?= $this->timeFormat(substr($entry['reservation']->need('time_start'), 0, 5)) ?> - <?= $this->timeFormat(substr($entry['reservation']->need('time_end'), 0, 5), true, null, true) ?></td>
+                                    <td><?= $this->escapeHtml(array_shift($players)) ?></td>
+                                    <td><?= $this->escapeHtml(implode(', ', $players)) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </table>
+            <?php endif; ?>
+        </section>
+    <?php endforeach; ?>
+
+    <footer><?= $this->escapeHtml(sprintf($this->t('Printed %s'), $this->dateFormat(new DateTime(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT))) ?></footer>
+
+</div>
+</body>
+</html>

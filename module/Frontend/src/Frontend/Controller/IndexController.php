@@ -88,6 +88,54 @@ class IndexController extends AbstractActionController
         return $this->redirect()->toRoute('frontend');
     }
 
+    public function daySheetAction()
+    {
+        $this->authorize('admin.booking');
+
+        $date = DateTime::createFromFormat('!Y-m-d', (string) $this->params()->fromQuery('date'));
+
+        if (! $date) {
+            throw new RuntimeException('The passed date is invalid');
+        }
+
+        $serviceManager = @$this->getServiceLocator();
+        $greenManager = $serviceManager->get('Square\Manager\GreenManager');
+
+        $reservations = $serviceManager->get('Booking\Manager\ReservationManager')
+            ->getInRange($date, (clone $date)->setTime(23, 59, 59));
+        $bookings = $serviceManager->get('Booking\Manager\BookingManager')->getByReservations($reservations);
+        $serviceManager->get('User\Manager\UserManager')->getByBookings($bookings);
+
+        $bookingsBySquare = array();
+
+        foreach ($reservations as $reservation) {
+            $booking = $reservation->getExtra('booking');
+
+            if ($booking && $booking->need('status') != 'cancelled') {
+                $bookingsBySquare[$booking->need('sid')][] = array('reservation' => $reservation, 'booking' => $booking);
+            }
+        }
+
+        $greens = $greenManager->getGreens();
+        $closed = array();
+
+        foreach ($greens as $green => $squares) {
+            $closed[$green] = $greenManager->isClosed($green, $date);
+        }
+
+        $viewModel = new ViewModel(array(
+            'date' => $date,
+            'greens' => $greens,
+            'closed' => $closed,
+            'bookingsBySquare' => $bookingsBySquare,
+        ));
+
+        $viewModel->setTemplate('frontend/index/day-sheet');
+        $viewModel->setTerminal(true);
+
+        return $viewModel;
+    }
+
     protected function greensOverview()
     {
         $serviceManager = @$this->getServiceLocator();

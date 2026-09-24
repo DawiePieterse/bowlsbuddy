@@ -13,6 +13,16 @@ return array(
                     ),
                 ),
             ),
+            'day-sheet' => array(
+                'type' => 'Literal',
+                'options' => array(
+                    'route' => '/greens/day-sheet',
+                    'defaults' => array(
+                        'controller' => 'Frontend\Controller\Index',
+                        'action' => 'day-sheet',
+                    ),
+                ),
+            ),
             'green-toggle' => array(
                 'type' => 'Literal',
                 'options' => array(

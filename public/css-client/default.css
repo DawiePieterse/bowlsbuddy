@@ -46,6 +46,7 @@ a.green-cell-full:hover { background-color: #dcdce2; }
 
 #greens-userpanel { text-align: center; }
 #greens-invite { text-align: center; margin-top: 16px; }
+a.greens-day-sheet { display: inline-block; margin-top: 6px; font-size: 12px; }
 #greens-invite .gray { display: block; margin-top: 8px; font-size: 12px; }
 #greens-userpanel table { display: inline-table; }
 

@@ -59,6 +59,10 @@ $this->setup(array(
             <td class="greens-day">
                 <b><?= $this->t($date->format('l')) ?></b><br>
                 <span class="gray"><?= $this->dateFormat($date, IntlDateFormatter::MEDIUM) ?></span>
+
+                <?php if ($this->user && $this->user->can('admin.booking')): ?>
+                    <br><a href="<?= $this->url('day-sheet', [], ['query' => ['date' => $date->format('Y-m-d')]]) ?>" class="greens-day-sheet"><?= $this->t('Day sheet') ?></a>
+                <?php endif; ?>
             </td>
 
             <?php foreach ($this->greens as $green => $squares): ?>
