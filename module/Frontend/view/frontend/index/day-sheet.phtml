@@ -61,7 +61,7 @@ $names = $this->calendarBookingNames();
         </div>
 
         <div class="qr">
-            <div id="qr-code" data-url="<?= $this->escapeHtmlAttr($this->serverUrl($this->url('frontend'))) ?>"></div>
+            <div id="qr-code" data-path="<?= $this->escapeHtmlAttr($this->url('frontend')) ?>"></div>
             <div class="qr-caption"><?= $this->t('Scan for live bookings') ?></div>
         </div>
     </header>
@@ -129,7 +129,7 @@ $names = $this->calendarBookingNames();
     (function () {
         var container = document.getElementById('qr-code');
         var qr = qrcode(0, 'M');
-        qr.addData(container.getAttribute('data-url'));
+        qr.addData(new URL(container.getAttribute('data-path'), window.location.href).href);
         qr.make();
         container.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 4 });
     })();
