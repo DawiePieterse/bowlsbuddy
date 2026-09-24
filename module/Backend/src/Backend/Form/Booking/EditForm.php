@@ -63,7 +63,7 @@ class EditForm extends Form
                 'style' => 'width: 124px',
             ),
             'options' => array(
-                'label' => 'Square',
+                'label' => 'Rink',
                 'value_options' => $squareOptions,
             ),
         ));

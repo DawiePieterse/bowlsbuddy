@@ -99,6 +99,15 @@ a.whatsapp-share:link,
 a.whatsapp-share:visited { color: #FFF !important; background: #25D366; border-color: #25D366; font-weight: 600; text-decoration: none; }
 a.whatsapp-share:hover { background: #1da851; border-color: #1da851; }
 
+/* Layout - Booking administration form */
+
+form#bf .quarter-table { width: 33.333%; }
+form#bf .sandbox input[type=text],
+form#bf .sandbox select,
+form#bf .sandbox textarea { max-width: 100%; box-sizing: border-box; }
+#bf-date-start, #bf-date-end, #bf-time-start, #bf-time-end { width: 124px !important; }
+#bf-notes { width: 100% !important; }
+
 /* Layout - Alternate Calendar */
 
 .cc-range-member a {
