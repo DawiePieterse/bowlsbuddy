@@ -11,70 +11,7 @@ class AccountController extends AbstractActionController
 {
 
     public function passwordAction()
-    {
-        $serviceManager = @$this->getServiceLocator();
-        $formElementManager = $serviceManager->get('FormElementManager');
-
-        $passwordForm = $formElementManager->get('User\Form\PasswordForm');
-        $passwordMessage = null;
-
-        if ($this->getRequest()->isPost()) {
-            $passwordForm->setData($this->params()->fromPost());
-
-            if ($passwordForm->isValid()) {
-                $passwordData = $passwordForm->getData();
-
-                $userManager = $serviceManager->get('User\Manager\UserManager');
-                $user = current( $userManager->getBy(array('email' => $passwordData['pf-email'])) );
-
-                if ($user) {
-                    $mailMessage = $this->t('We have just received your request to reset your password.') . "\r\n\r\n";
-
-                    switch ($user->need('status')) {
-                        case 'placeholder':
-                            $mailMessage .= $this->t('Unfortunately, your account is considered a placeholder and thus cannot login.');
-                            break;
-                        case 'blocked':
-                            $mailMessage .= $this->t('Unfortunately, your account is currently blocked. Please contact us for support.');
-                            break;
-                        case 'disabled':
-                            $mailMessage .= $this->t('Unfortunately, your account has not yet been activated. If you did not receive an activation email yet, you can request a new one here:') . "\r\n\r\n";
-                            $mailMessage .= $this->url()->fromRoute('user/activation-resend', [], ['force_canonical' => true]);
-
-                            break;
-                        case 'enabled':
-                            $resetCode = base64_encode( substr($user->need('pw'), 16, 8) );
-
-                            $mailMessage .= $this->t('Simply visit the following website to type your new password:') . "\r\n\r\n";
-                            $mailMessage .= $this->url()->fromRoute('user/password-reset', [], ['query' => ['id' => $user->need('uid'), 'code' => $resetCode], 'force_canonical' => true]);
-
-                            break;
-                        case 'assist':
-                        case 'admin':
-                            $mailMessage .= $this->t('However, you are using a privileged account. For safety, you cannot reset your password this way. Please contact the system support.');
-                            break;
-                        default:
-                            $mailMessage .= $this->t('Unfortunately, your account seems somewhat unique, thus we are unsure how to treat it. Mind contacting us?');
-                            break;
-                    }
-
-                    $userMailService = $serviceManager->get('User\Service\MailService');
-                    $userMailService->send($user, $this->t('Forgot your password?'), $mailMessage);
-                }
-            }
-
-            $passwordForm->get('pf-email')->setValue('');
-
-            $passwordMessage = sprintf('%s <div class="small-text">(%s)</div>',
-                $this->t('All right, you should receive an email from us soon'),
-                $this->t('if we find a valid user account with this email address'));
-        }
-
-        return array(
-            'passwordForm' => $passwordForm,
-            'passwordMessage' => $passwordMessage,
-        );
-    }
+    { }
 
     public function passwordResetAction()
     {
