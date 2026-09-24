@@ -149,8 +149,10 @@ class AccountController extends AbstractActionController
 
                 $meta = array();
                 $meta['locale'] = $this->config('i18n.locale');
+                $meta['firstname'] = $registrationData['rf-firstname'];
+                $meta['lastname'] = $registrationData['rf-lastname'];
 
-                $alias = str_pad(strstr($registrationData['rf-email1'], '@', true), 3, '_');
+                $alias = str_pad($registrationData['rf-firstname'] . ' ' . $registrationData['rf-lastname'], 3, '_');
 
                 if ($this->option('service.user.activation') == 'immediate') {
                     $status = 'enabled';

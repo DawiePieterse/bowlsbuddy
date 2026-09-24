@@ -26,6 +26,35 @@ class RegistrationForm extends Form
     {
         $this->setName('rf');
 
+        /* Personal data */
+
+        $this->add(array(
+            'name' => 'rf-firstname',
+            'type' => 'Text',
+            'attributes' => array(
+                'id' => 'rf-firstname',
+                'class' => 'autofocus',
+                'style' => 'width: 250px;',
+            ),
+            'options' => array(
+                'label' => 'Name',
+                'notes' => 'Shown on the rink bookings',
+            ),
+        ));
+
+        $this->add(array(
+            'name' => 'rf-lastname',
+            'type' => 'Text',
+            'attributes' => array(
+                'id' => 'rf-lastname',
+                'style' => 'width: 250px;',
+            ),
+            'options' => array(
+                'label' => 'Surname',
+                'notes' => 'Shown on the rink bookings',
+            ),
+        ));
+
         /* Credentials */
 
         $this->add(array(
@@ -33,7 +62,6 @@ class RegistrationForm extends Form
             'type' => 'Text',
             'attributes' => array(
                 'id' => 'rf-email1',
-                'class' => 'autofocus',
                 'style' => 'width: 250px;',
             ),
             'options' => array(
@@ -166,6 +194,50 @@ class RegistrationForm extends Form
         $factory = new Factory();
 
         $this->setInputFilter($factory->createInputFilter(array(
+            'rf-firstname' => array(
+                'filters' => array(
+                    array('name' => 'StripTags'),
+                    array('name' => 'StringTrim'),
+                ),
+                'validators' => array(
+                    array(
+                        'name' => 'NotEmpty',
+                        'options' => array(
+                            'message' => 'Please type your name here',
+                        ),
+                        'break_chain_on_failure' => true,
+                    ),
+                    array(
+                        'name' => 'StringLength',
+                        'options' => array(
+                            'max' => 60,
+                            'message' => 'This name is too long',
+                        ),
+                    ),
+                ),
+            ),
+            'rf-lastname' => array(
+                'filters' => array(
+                    array('name' => 'StripTags'),
+                    array('name' => 'StringTrim'),
+                ),
+                'validators' => array(
+                    array(
+                        'name' => 'NotEmpty',
+                        'options' => array(
+                            'message' => 'Please type your surname here',
+                        ),
+                        'break_chain_on_failure' => true,
+                    ),
+                    array(
+                        'name' => 'StringLength',
+                        'options' => array(
+                            'max' => 60,
+                            'message' => 'This surname is too long',
+                        ),
+                    ),
+                ),
+            ),
             'rf-email1' => array(
                 'filters' => array(
                     array('name' => 'StringTrim'),

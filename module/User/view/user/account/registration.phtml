@@ -53,6 +53,8 @@ $this->headScript()->appendFile($this->basePath('js/controller/user/registration
 
             <div>
                 <table class="default-table" style="margin: 0 auto;">
+                    <?= $this->formRowDefault($form, 'rf-firstname') ?>
+                    <?= $this->formRowDefault($form, 'rf-lastname') ?>
                     <?= $this->formRowDefault($form, 'rf-email1') ?>
                     <?= $this->formRowDefault($form, 'rf-email2') ?>
                     <?= $this->formRowDefault($form, 'rf-pw1') ?>
