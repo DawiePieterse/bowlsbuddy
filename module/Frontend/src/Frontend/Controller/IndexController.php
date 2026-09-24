@@ -116,17 +116,10 @@ class IndexController extends AbstractActionController
             }
         }
 
-        $greens = $greenManager->getGreens();
-        $closed = array();
-
-        foreach ($greens as $green => $squares) {
-            $closed[$green] = $greenManager->isClosed($green, $date);
-        }
-
         $viewModel = new ViewModel(array(
             'date' => $date,
-            'greens' => $greens,
-            'closed' => $closed,
+            'greens' => $greenManager->getGreens(),
+            'closed' => $greenManager->getClosedOn($date),
             'bookingsBySquare' => $bookingsBySquare,
         ));
 
@@ -141,40 +134,50 @@ class IndexController extends AbstractActionController
         $serviceManager = @$this->getServiceLocator();
 
         $greenManager = $serviceManager->get('Square\Manager\GreenManager');
+        $squareManager = $serviceManager->get('Square\Manager\SquareManager');
+        $squareValidator = $serviceManager->get('Square\Service\SquareValidator');
+        $reservationManager = $serviceManager->get('Booking\Manager\ReservationManager');
+        $eventManager = $serviceManager->get('Event\Manager\EventManager');
         $user = $serviceManager->get('User\Manager\UserSessionManager')->getSessionUser();
 
         $greens = $greenManager->getGreens();
 
+        /* Sets the time_start_sec and time_end_sec extras on each rink */
+        $squareManager->getMinStartTime();
+        $squareManager->getMaxEndTime();
+
         $rangeStart = new DateTime('today');
         $rangeEnd = new DateTime('today +14 days');
 
-        $reservationManager = $serviceManager->get('Booking\Manager\ReservationManager');
-        $reservations = $reservationManager->getInRange($rangeStart, $rangeEnd);
+        $reservations = $reservationManager->getInRange($rangeStart, $rangeEnd, null, null, false);
+        $reservationManager->getSecondsPerDay($reservations);
         $serviceManager->get('Booking\Manager\BookingManager')->getByReservations($reservations);
-        $events = $serviceManager->get('Event\Manager\EventManager')->getInRange($rangeStart, $rangeEnd);
+
+        $events = $eventManager->getInRange($rangeStart, $rangeEnd);
+        $eventManager->getSecondsPerDay($events);
 
         $occupancy = $this->collectOccupancy($reservations);
+        $blocked = $this->collectBlocked($events);
+        $now = time();
 
         $days = array();
         $day = clone $rangeStart;
 
         for ($i = 0; $i < 14; $i++) {
-            if (! $this->isDayHidden($day)) {
-                $closed = array();
+            if (! $squareValidator->isDayHidden($day)) {
                 $available = array();
 
                 foreach ($greens as $green => $squares) {
-                    $closed[$green] = $greenManager->isClosed($green, $day);
                     $available[$green] = 0;
 
                     foreach ($squares as $square) {
-                        if ($this->isRinkAvailable($square, $day, $occupancy, $events)) {
+                        if ($this->isRinkAvailable($square, $day->getTimestamp(), $occupancy[$day->format('Y-m-d')][$square->need('sid')] ?? array(), $blocked, $now)) {
                             $available[$green]++;
                         }
                     }
                 }
 
-                $days[] = array('date' => clone $day, 'closed' => $closed, 'available' => $available);
+                $days[] = array('date' => clone $day, 'closed' => $greenManager->getClosedOn($day), 'available' => $available);
             }
 
             $day->modify('+1 day');
@@ -207,8 +210,8 @@ class IndexController extends AbstractActionController
             }
 
             $occupancy[$reservation->need('date')][$booking->need('sid')][] = array(
-                $this->timeToSeconds($reservation->need('time_start')),
-                $this->timeToSeconds($reservation->need('time_end')),
+                $reservation->needExtra('time_start_sec'),
+                $reservation->needExtra('time_end_sec'),
                 (int) $booking->need('quantity'),
             );
         }
@@ -216,32 +219,38 @@ class IndexController extends AbstractActionController
         return $occupancy;
     }
 
+    /* @return array list of [sid or null for all rinks, start timestamp, end timestamp] of enabled events */
+    protected function collectBlocked(array $events)
+    {
+        $blocked = array();
+
+        foreach ($events as $event) {
+            if ($event->need('status') == 'enabled') {
+                $blocked[] = array($event->get('sid'), $event->needExtra('datetime_start')->getTimestamp(), $event->needExtra('datetime_end')->getTimestamp());
+            }
+        }
+
+        return $blocked;
+    }
+
     /* A rink is available when at least one of its time slots that day has not started and can still be booked. */
-    protected function isRinkAvailable($square, DateTime $day, array $occupancy, array $events)
+    protected function isRinkAvailable($square, $dayTimestamp, array $taken, array $blocked, $now)
     {
         $sid = $square->need('sid');
         $capacity = (int) $square->need('capacity');
         $capacityHeterogenic = $square->need('capacity_heterogenic');
         $timeBlock = (int) $square->need('time_block');
-        $now = new DateTime();
+        $timeEnd = $square->needExtra('time_end_sec');
 
-        $taken = $occupancy[$day->format('Y-m-d')][$sid] ?? array();
-
-        for ($slotStart = $this->timeToSeconds($square->need('time_start')); $slotStart < $this->timeToSeconds($square->need('time_end')); $slotStart += $timeBlock) {
+        for ($slotStart = $square->needExtra('time_start_sec'); $slotStart < $timeEnd; $slotStart += $timeBlock) {
             $slotEnd = $slotStart + $timeBlock;
 
-            $slotStartDateTime = (clone $day)->modify('+' . $slotStart . ' sec');
-            $slotEndDateTime = (clone $day)->modify('+' . $slotEnd . ' sec');
-
-            if ($slotStartDateTime <= $now) {
+            if ($dayTimestamp + $slotStart <= $now) {
                 continue;
             }
 
-            foreach ($events as $event) {
-                if ((is_null($event->get('sid')) || $event->get('sid') == $sid) &&
-                    new DateTime($event->need('datetime_start')) < $slotEndDateTime &&
-                    new DateTime($event->need('datetime_end')) > $slotStartDateTime) {
-
+            foreach ($blocked as list($blockedSid, $blockedStart, $blockedEnd)) {
+                if ((is_null($blockedSid) || $blockedSid == $sid) && $blockedStart < $dayTimestamp + $slotEnd && $blockedEnd > $dayTimestamp + $slotStart) {
                     continue 2;
                 }
             }
@@ -262,41 +271,9 @@ class IndexController extends AbstractActionController
         return false;
     }
 
-    protected function timeToSeconds($time)
-    {
-        $parts = explode(':', $time);
-
-        return $parts[0] * 3600 + $parts[1] * 60 + ($parts[2] ?? 0);
-    }
-
     protected function greensCsrf()
     {
         return new Csrf(array('name' => 'greens_csrf', 'timeout' => 3600));
-    }
-
-    /* Mirrors the day exception rules of the calendar ("Sunday", "2026-12-25", "+2026-12-26" to force show) */
-    protected function isDayHidden(DateTime $date)
-    {
-        $hidden = false;
-        $forced = false;
-
-        foreach (preg_split('~(\\n|,)~', (string) $this->option('service.calendar.day-exceptions')) as $dayException) {
-            $dayException = trim($dayException);
-
-            if (! $dayException) {
-                continue;
-            }
-
-            if ($dayException[0] === '+') {
-                if (trim($dayException, '+') === $date->format($this->t('Y-m-d'))) {
-                    $forced = true;
-                }
-            } else if ($dayException === $date->format($this->t('Y-m-d')) || $dayException === $this->t($date->format('l'))) {
-                $hidden = true;
-            }
-        }
-
-        return $hidden && ! $forced;
     }
 
 }

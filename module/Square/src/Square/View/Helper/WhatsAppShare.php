@@ -19,8 +19,13 @@ class WhatsAppShare extends AbstractHelper
         $this->greenManager = $greenManager;
     }
 
-    public function __invoke(Booking $booking, Square $square, DateTime $dateTimeStart, DateTime $dateTimeEnd)
+    /* @return string|self share button for the booking, or the helper itself when called without a booking */
+    public function __invoke(?Booking $booking = null, ?Square $square = null, ?DateTime $dateTimeStart = null, ?DateTime $dateTimeEnd = null)
     {
+        if (! $booking) {
+            return $this;
+        }
+
         $view = $this->getView();
 
         $rink = $square->need('name');
@@ -30,17 +35,21 @@ class WhatsAppShare extends AbstractHelper
             $rink .= ' (' . sprintf($view->t('Green %s'), $green) . ')';
         }
 
-        $lines = array(
+        return $this->link(implode("\n", array(
             '*' . $view->option('client.name.full') . ' - ' . $view->t('Rink booking') . '*',
             $view->option('subject.square.type') . ' ' . $rink,
             $view->dateFormat($dateTimeStart, IntlDateFormatter::FULL),
-            $view->timeFormat($dateTimeStart) . ' - ' . $view->timeFormat($dateTimeEnd, true, null, true),
+            $view->timeRange($dateTimeStart, $dateTimeEnd, '%s - %s'),
             $view->t('Players') . ': ' . implode(', ', $view->calendarBookingNames()->names($booking)),
             $view->serverUrl($view->url('frontend')),
-        );
+        )), $view->t('Share via WhatsApp'));
+    }
 
+    /* Button that opens WhatsApp with the text prefilled; the user picks the recipients there. */
+    public function link($text, $label)
+    {
         return sprintf('<a href="https://wa.me/?text=%s" target="_blank" rel="noopener" class="default-button whatsapp-share">%s</a>',
-            rawurlencode(implode("\n", $lines)), $view->t('Share via WhatsApp'));
+            rawurlencode($text), $this->getView()->escapeHtml($label));
     }
 
 }

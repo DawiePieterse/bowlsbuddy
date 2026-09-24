@@ -33,8 +33,8 @@ $names = $this->calendarBookingNames();
         th:nth-child(3) { width: 30%; }
         th, td { border: 1px solid #c7c7cc; padding: 8px 10px; text-align: left; vertical-align: top; }
         th { background: #f2f2f7; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        td.rink { font-weight: 700; width: 70px; }
-        td.time { width: 130px; white-space: nowrap; }
+        td.rink { font-weight: 700; }
+        td.time { white-space: nowrap; }
         td.free { color: #8e8e93; font-style: italic; }
         .closed { border: 2px solid #d70015; color: #d70015; font-weight: 700; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; }
         footer { margin-top: 28px; color: #8e8e93; font-size: 11px; text-align: right; }
@@ -67,25 +67,15 @@ $names = $this->calendarBookingNames();
     </header>
 
     <?php foreach ($this->greens as $green => $squares): ?>
-        <?php
-
-        $greenHasBookings = false;
-
-        foreach ($squares as $sid => $square) {
-            if (! empty($this->bookingsBySquare[$sid])) {
-                $greenHasBookings = true;
-            }
-        }
-
-        ?>
+        <?php $closed = $this->closed[$green]; ?>
         <section>
             <h2><?= $this->escapeHtml(sprintf($this->t('Green %s'), $green)) ?></h2>
 
-            <?php if ($this->closed[$green]): ?>
+            <?php if ($closed): ?>
                 <div class="closed"><?= $this->escapeHtml(sprintf($this->t('CLOSED - Green %s is closed on this day'), $green)) ?></div>
             <?php endif; ?>
 
-            <?php if (! $this->closed[$green] || $greenHasBookings): ?>
+            <?php if (! $closed || array_intersect_key($squares, $this->bookingsBySquare)): ?>
                 <table>
                     <tr>
                         <th><?= $this->t('Rink') ?></th>
@@ -95,24 +85,22 @@ $names = $this->calendarBookingNames();
                     </tr>
 
                     <?php foreach ($squares as $sid => $square): ?>
-                        <?php if (empty($this->bookingsBySquare[$sid])): ?>
-                            <?php if (! $this->closed[$green]): ?>
-                                <tr>
-                                    <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
-                                    <td class="time"><?= $this->timeFormat(substr($square->need('time_start'), 0, 5)) ?> - <?= $this->timeFormat(substr($square->need('time_end'), 0, 5), true, null, true) ?></td>
-                                    <td class="free" colspan="2"><?= $this->t('Free') ?></td>
-                                </tr>
-                            <?php endif; ?>
-                        <?php else: ?>
-                            <?php foreach ($this->bookingsBySquare[$sid] as $entry): ?>
-                                <?php $players = $names->names($entry['booking']); ?>
-                                <tr>
-                                    <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
-                                    <td class="time"><?= $this->timeFormat(substr($entry['reservation']->need('time_start'), 0, 5)) ?> - <?= $this->timeFormat(substr($entry['reservation']->need('time_end'), 0, 5), true, null, true) ?></td>
-                                    <td><?= $this->escapeHtml(array_shift($players)) ?></td>
-                                    <td><?= $this->escapeHtml(implode(', ', $players)) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
+                        <?php foreach ($this->bookingsBySquare[$sid] ?? array() as $entry): ?>
+                            <?php $players = $names->names($entry['booking']); ?>
+                            <tr>
+                                <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
+                                <td class="time"><?= $this->timeRange($entry['reservation']->need('time_start'), $entry['reservation']->need('time_end'), '%s - %s') ?></td>
+                                <td><?= $this->escapeHtml(array_shift($players)) ?></td>
+                                <td><?= $this->escapeHtml(implode(', ', $players)) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+
+                        <?php if (empty($this->bookingsBySquare[$sid]) && ! $closed): ?>
+                            <tr>
+                                <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
+                                <td class="time"><?= $this->timeRange($square->need('time_start'), $square->need('time_end'), '%s - %s') ?></td>
+                                <td class="free" colspan="2"><?= $this->t('Free') ?></td>
+                            </tr>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </table>

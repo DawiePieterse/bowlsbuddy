@@ -28,7 +28,7 @@ $this->setup(array(
 
     ?>
     <div id="greens-invite">
-        <a href="https://wa.me/?text=<?= rawurlencode($inviteText) ?>" target="_blank" rel="noopener" class="default-button whatsapp-share"><?= $this->t('Invite members via WhatsApp') ?></a>
+        <?= $this->squareWhatsAppShare()->link($inviteText, $this->t('Invite members via WhatsApp')) ?>
         <span class="gray"><?= $this->t('Sends the registration link; you choose the recipients in WhatsApp.') ?></span>
     </div>
 <?php endif; ?>

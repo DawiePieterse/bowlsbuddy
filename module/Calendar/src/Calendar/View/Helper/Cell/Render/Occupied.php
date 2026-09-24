@@ -30,7 +30,7 @@ class Occupied extends AbstractHelper
                 $bookingTypeColor = $this->bookingTypeService->getTypeColor($userBooking->getMeta('type'));
                 $cellStyle = $bookingTypeColor ? 'background-color: ' . $bookingTypeColor . ';' : null;
 
-                return $view->calendarCellLink($cellLabel,$view->url('square', [], $cellLinkParams), 'cc-own' . $cellGroup, null, $cellStyle);
+                return $view->calendarCellLink($cellLabel, $view->url('square', [], $cellLinkParams), 'cc-own' . $cellGroup, null, $cellStyle);
             } else {
                 return $view->calendarCellRenderOccupiedForVisitors($reservations, $cellLinkParams, $square, $user);
             }

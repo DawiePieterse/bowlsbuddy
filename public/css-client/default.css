@@ -50,13 +50,6 @@ a.greens-day-sheet { display: inline-block; margin-top: 6px; font-size: 12px; }
 #greens-invite .gray { display: block; margin-top: 8px; font-size: 12px; }
 #greens-userpanel table { display: inline-table; }
 
-@media (max-width: 768px) {
-    #greens-userpanel table,
-    #greens-userpanel tbody,
-    #greens-userpanel tr { display: block; }
-    #greens-userpanel td { display: inline-block; padding: 4px !important; border: none !important; }
-}
-
 #green-heading { margin: 16px; padding: 12px 16px; }
 .green-heading-name { font-size: 18px; font-weight: bold; margin-left: 12px; vertical-align: middle; }
 .green-closed-banner { margin-top: 12px; padding: 12px; border-radius: 8px; color: #FFF; background-color: #d70015; font-weight: bold; text-align: center; }
@@ -70,13 +63,16 @@ a.cc-own .cc-label { white-space: nowrap; overflow: hidden; text-overflow: ellip
 @media (max-width: 768px) {
     #green-heading { margin: 8px; }
 
+    #greens-userpanel table,
+    #greens-userpanel tbody,
+    #greens-userpanel tr,
     #calendar-toolbar-userpanel table,
     #calendar-toolbar-userpanel tbody,
     #calendar-toolbar-userpanel tr { display: block; }
+    #greens-userpanel td,
     #calendar-toolbar-userpanel td { display: inline-block; padding: 4px !important; border: none !important; }
-    #calendar-toolbar-userpanel { margin-left: 8px; margin-right: 8px; }
     #calendar-toolbar-datepicker,
-    #calendar-toolbar-userpanel { max-width: calc(100% - 16px); box-sizing: border-box; }
+    #calendar-toolbar-userpanel { margin-left: 8px; margin-right: 8px; max-width: calc(100% - 16px); box-sizing: border-box; }
     #calendar-toolbar-datepicker { padding-left: 12px; padding-right: 12px; }
 
     #calendar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px; }

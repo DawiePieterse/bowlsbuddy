@@ -25,14 +25,7 @@ class GreenManager
 
     public function getGreenOf(Square $square)
     {
-        $name = $square->need('name');
-        $dashPosition = strpos($name, '-');
-
-        if ($dashPosition === false) {
-            return trim($name);
-        }
-
-        return trim(substr($name, 0, $dashPosition));
+        return trim(explode('-', $square->need('name'), 2)[0]);
     }
 
     /**
@@ -62,6 +55,18 @@ class GreenManager
         $closed = $this->loadClosed();
 
         return isset($closed[$date->format('Y-m-d') . ':' . $green]);
+    }
+
+    /* @return array green => whether it is closed on the passed day */
+    public function getClosedOn(DateTime $date)
+    {
+        $closed = array();
+
+        foreach (array_keys($this->getGreens()) as $green) {
+            $closed[$green] = $this->isClosed($green, $date);
+        }
+
+        return $closed;
     }
 
     public function isSquareClosed(Square $square, DateTime $date)

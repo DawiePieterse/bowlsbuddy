@@ -62,7 +62,7 @@ return array(
 
         'factories' => array(
             'CalendarCellLogic' => 'Calendar\View\Helper\Cell\CellLogicFactory',
-            'CalendarCellRenderOccupied'=> 'Calendar\View\Helper\Cell\Render\OccupiedFactory',
+            'CalendarCellRenderOccupied' => 'Calendar\View\Helper\Cell\Render\OccupiedFactory',
             'CalendarCellRenderOccupiedForPrivileged' => 'Calendar\View\Helper\Cell\Render\OccupiedForPrivilegedFactory',
             'CalendarCellRenderOccupiedForVisitors' => 'Calendar\View\Helper\Cell\Render\OccupiedForVisitorsFactory',
         ),

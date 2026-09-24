@@ -203,41 +203,8 @@ class SquareValidator extends AbstractService
 
         /* Check for day exception */
 
-        $dayExceptions = $this->optionManager->get('service.calendar.day-exceptions');
-
-        if ($dayExceptions) {
-            $dayExceptions = preg_split('~(\\n|,)~', $dayExceptions);
-            $dayExceptionsExceptions = [];
-
-            $dayExceptionsCleaned = [];
-
-            foreach ($dayExceptions as $dayException) {
-                $dayException = trim($dayException);
-
-                if ($dayException) {
-                    if ($dayException[0] === '+') {
-                        $dayExceptionsExceptions[] = trim($dayException, '+');
-                    } else {
-                        $dayExceptionsCleaned[] = $dayException;
-                    }
-                }
-            }
-
-            $dayExceptions = $dayExceptionsCleaned;
-
-            if (in_array($dateStart->format($this->t('Y-m-d')), $dayExceptions) ||
-                in_array($this->t($dateStart->format('l')), $dayExceptions)) {
-
-                if (! in_array($dateStart->format($this->t('Y-m-d')), $dayExceptionsExceptions)) {
-                    throw new RuntimeException('The passed date has been hidden from the calendar');
-                }
-            }
-        }
-
-        /* Check for closed green */
-
-        if ($this->greenManager->isSquareClosed($square, $dateStart)) {
-            throw new RuntimeException(sprintf($this->t('Green %s is closed on this day'), $this->greenManager->getGreenOf($square)));
+        if ($this->isDayHidden($dateStart)) {
+            throw new RuntimeException('The passed date has been hidden from the calendar');
         }
 
         /* Return validation byproducts */
@@ -248,6 +215,29 @@ class SquareValidator extends AbstractService
             'square' => $square,
             'user' => $this->user,
         );
+    }
+
+    /* Day exceptions option: "Sunday" or "2026-12-25" hides a day, "+2026-12-26" shows it anyway. */
+    public function isDayHidden(DateTime $date)
+    {
+        $hidden = false;
+        $forced = false;
+
+        foreach (preg_split('~(\\n|,)~', (string) $this->optionManager->get('service.calendar.day-exceptions')) as $dayException) {
+            $dayException = trim($dayException);
+
+            if (! $dayException) {
+                continue;
+            }
+
+            if ($dayException[0] === '+') {
+                $forced = $forced || trim($dayException, '+') === $date->format($this->t('Y-m-d'));
+            } else if ($dayException === $date->format($this->t('Y-m-d')) || $dayException === $this->t($date->format('l'))) {
+                $hidden = true;
+            }
+        }
+
+        return $hidden && ! $forced;
     }
 
     /**
@@ -357,17 +347,22 @@ class SquareValidator extends AbstractService
             }
         }
 
+        /* Check for closed green */
+
+        if ($this->greenManager->isSquareClosed($square, $dateStart)) {
+            $bookable = false;
+            $notBookableReason = sprintf($this->t('Green %s is closed on this day'), $this->greenManager->getGreenOf($square));
+        }
+
         /* Check for one booking per member per day */
 
         if ($user && $bookable && ! $user->can('calendar.create-single-bookings')) {
-            $dayStart = (clone $dateStart)->setTime(0, 0);
-            $dayEnd = (clone $dateStart)->setTime(23, 59, 59);
-
-            $dayReservations = $this->reservationManager->getInRange($dayStart, $dayEnd);
-            $dayBookings = $this->bookingManager->getByReservations($dayReservations);
+            $dayReservations = $this->reservationManager->getInRange(
+                (clone $dateStart)->setTime(0, 0), (clone $dateStart)->setTime(23, 59, 59), null, null, false);
+            $dayBookings = $this->bookingManager->getByReservations($dayReservations, array('uid' => $user->need('uid')));
 
             foreach ($dayBookings as $dayBooking) {
-                if ($dayBooking->need('uid') == $user->need('uid') && $dayBooking->need('status') != 'cancelled') {
+                if ($dayBooking->need('status') != 'cancelled') {
                     $bookable = false;
                     $notBookableReason = 'You can only book <b>one %s per day</b>. You already have a booking on this day.';
                     break;
