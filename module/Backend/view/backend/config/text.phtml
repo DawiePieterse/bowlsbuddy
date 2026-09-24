@@ -34,7 +34,7 @@ $this->setup(array(
         <?= $this->form()->openTag($form) ?>
 
         <table class="default-table">
-            <?php foreach (\Backend\Form\Config\TextForm::$definitions as $key => $value): $key = str_replace('.', '_', $key); ?>
+            <?php foreach (\Backend\Form\Config\TextForm::getBackendDefinitions() as $key => $value): $key = str_replace('.', '_', $key); ?>
 
 	            <?php
 

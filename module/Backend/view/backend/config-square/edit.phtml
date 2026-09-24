@@ -8,7 +8,7 @@ if ($this->square) {
 
 $this->setup(array(
     'title' => $this->option('subject.square.type.plural'),
-    'panel' => 'centered-panel',
+    'panel' => 'centered-panel large-sized',
     'back' => array(
         $this->option('subject.square.type.plural') => $this->url('backend/config/square'),
     ),
@@ -35,9 +35,21 @@ $this->headScript()->appendFile($this->basePath('js/controller/backend/config-sq
         $form->setAttribute('action', $this->url('backend/config/square/edit', ['sid' => $sid]));
         $form->prepare();
 
+        /* Names only: the club does not collect email addresses or phone numbers of other players */
+        $askNames = $form->get('cf-capacity-ask-names');
+        $askNames->setAttribute('style', 'width: 320px;');
+        $askNames->setValueOptions(array_intersect_key($askNames->getValueOptions(),
+            array_flip(array_filter(['optional-names', 'required-names', $askNames->getValue()]))));
+
+        $heterogenic = $form->get('cf-capacity-heterogenic');
+        $nameVisibility = $form->get('cf-name-visibility');
+
         ?>
 
         <?= $this->form()->openTag($form) ?>
+
+        <input type="hidden" name="cf-capacity-heterogenic" value="<?= $heterogenic->isChecked() ? '1' : '0' ?>">
+        <input type="hidden" name="cf-name-visibility" value="<?= $this->escapeHtmlAttr($nameVisibility->getValue()) ?>">
 
         <table class="default-table">
             <?= $this->formRowDefault($form, 'cf-name') ?>
@@ -46,10 +58,8 @@ $this->headScript()->appendFile($this->basePath('js/controller/backend/config-sq
             <?= $this->formRowDefault($form, 'cf-priority') ?>
             <?= $this->formRowDefault($form, 'cf-capacity') ?>
             <?= $this->formRowDefault($form, 'cf-capacity-ask-names') ?>
-            <?= $this->formRowCheckbox($form, 'cf-capacity-heterogenic') ?>
             <?= $this->formRowCheckbox($form, 'cf-allow-notes') ?>
             <?= $this->formRowCheckbox($form, 'cf-allow-custom-name') ?>
-            <?= $this->formRowDefault($form, 'cf-name-visibility') ?>
             <?= $this->formRowDefault($form, 'cf-time-start') ?>
             <?= $this->formRowDefault($form, 'cf-time-end') ?>
             <?= $this->formRowDefault($form, 'cf-time-block') ?>
@@ -67,7 +77,7 @@ $this->headScript()->appendFile($this->basePath('js/controller/backend/config-sq
                     <td class="default-form-label-row">&nbsp;</td>
                     <td>
                         <a href="<?= $this->url('backend/config/square/edit/info', ['sid' => $this->square->need('sid')]) ?>" class="default-button">
-                            <span class="symbolic symbolic-edit"><?= $this->t('Edit square info and rule texts') ?></span>
+                            <span class="symbolic symbolic-edit"><?= $this->t('Edit rink info and rule texts') ?></span>
                         </a>
                     </td>
                 </tr>

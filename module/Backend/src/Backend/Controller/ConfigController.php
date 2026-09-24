@@ -22,6 +22,7 @@ class ConfigController extends AbstractActionController
         $formElementManager = $serviceManager->get('FormElementManager');
 
         $textForm = $formElementManager->get('Backend\Form\Config\TextForm');
+        $textForm->removeBackendHidden();
 
         if ($this->getRequest()->isPost()) {
             $textForm->setData($this->params()->fromPost());
@@ -29,7 +30,7 @@ class ConfigController extends AbstractActionController
             if ($textForm->isValid()) {
                 $textData = $textForm->getData();
 
-                foreach (TextForm::$definitions as $key => $value) {
+                foreach (TextForm::getBackendDefinitions() as $key => $value) {
                     $formKey = str_replace('.', '_', $key);
 
 	                $currentValue = $optionManager->get($key);
@@ -55,7 +56,7 @@ class ConfigController extends AbstractActionController
                 return $this->redirect()->toRoute('backend/config/text');
             }
         } else {
-            foreach (TextForm::$definitions as $key => $value) {
+            foreach (TextForm::getBackendDefinitions() as $key => $value) {
                 $formKey = str_replace('.', '_', $key);
                 $textForm->get('cf-' . $formKey)->setValue($optionManager->get($key));
             }

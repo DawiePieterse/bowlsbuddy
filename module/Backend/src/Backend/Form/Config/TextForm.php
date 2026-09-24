@@ -10,18 +10,39 @@ class TextForm extends Form
 
     public static $definitions = array(
         'client.name.full' => array('Your name', 'Will be shown as the operator of this site.<br>Displayed next to the logo, for example.'),
-        'client.name.short' => array('Your abbreviation', 'Short form or abbreviation of your name.<br>Displayed in emails, for example.'),
+        'client.name.short' => array('Your abbreviation', 'Short form or abbreviation of your name.'),
         'client.contact.email' => array('Your email address', 'Will be used for system notifications.<br>Might also be displayed to users for help.'),
 	    'client.contact.email.user-notifications' => array('Send user emails like booking/cancel confirmation to this address as well', null, 'Checkbox'),
         'service.name.full' => array('Name of the system', 'The system presents itself under this name.<br>Displayed next to the logo, for example.'),
-        'service.name.short' => array('System abbreviation', 'Short form or abbreviation of the system name.<br>Displayed in emails, for example.'),
+        'service.name.short' => array('System abbreviation', 'Short form or abbreviation of the system name.'),
         'service.meta.description' => array('Description of your service', 'One or two short sentences recommended.'),
-        'subject.square.type' => array('Notation of your "squares"', 'Singular'),
-        'subject.square.type.plural' => array('Notation of your "squares"', 'Plural'),
-        'subject.square.unit' => array('Notation of your "players"', 'Singular'),
-        'subject.square.unit.plural' => array('Notation of your "players"', 'Plural'),
+        'subject.square.type' => array('Word for a "rink"', 'Singular'),
+        'subject.square.type.plural' => array('Word for a "rink"', 'Plural'),
+        'subject.square.unit' => array('Word for a "player"', 'Singular'),
+        'subject.square.unit.plural' => array('Word for a "player"', 'Plural'),
         'subject.type' => array('Name of your facility', 'Displayed in the header, for example.<br>Must start with a lower cased noun marker.'),
     );
+
+    /* Kept for the setup wizard, but not offered in the backend (the club sends no emails). */
+    public static $backendHidden = array(
+        'client.contact.email',
+        'client.contact.email.user-notifications',
+    );
+
+    public static function getBackendDefinitions()
+    {
+        return array_diff_key(self::$definitions, array_flip(self::$backendHidden));
+    }
+
+    public function removeBackendHidden()
+    {
+        foreach (self::$backendHidden as $key) {
+            $name = 'cf-' . str_replace('.', '_', $key);
+
+            $this->remove($name);
+            $this->getInputFilter()->remove($name);
+        }
+    }
 
     public function init()
     {

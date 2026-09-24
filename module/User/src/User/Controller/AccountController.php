@@ -104,16 +104,6 @@ class AccountController extends AbstractActionController
 
                 $userManager->save($user);
 
-                /* Send confirmation email to administration for manual activation */
-
-                if ($this->option('service.user.activation') == 'manual-email') {
-                    $backendMailService = $serviceManager->get('Backend\Service\MailService');
-                    $backendMailService->send(
-                        $this->t('New registration waiting for activation'),
-                        sprintf($this->t('A new user has registered to your %s. According to your configuration, this user will not be able to book %s until you manually activate him.'),
-                            $this->option('service.name.full', false), $this->option('subject.square.type.plural', false)));
-                }
-
                 /* Send confirmation email to user for activation */
 
                 if ($this->option('service.user.activation') == 'email') {

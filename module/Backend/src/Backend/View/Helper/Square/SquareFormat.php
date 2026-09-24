@@ -15,12 +15,9 @@ class SquareFormat extends AbstractHelper
 
         $html .= '<tr>';
 
-        $html .= sprintf('<td class="priority-col">%s</td>',
-            $square->get('priority'));
-
-        $html .= sprintf('<td><span class="gray">%s</span> %s</td>',
+        $html .= sprintf('<td style="white-space: nowrap;"><span class="gray">%s</span> %s</td>',
             $view->option('subject.square.type'),
-            $square->get('name'));
+            $view->escapeHtml($square->get('name')));
 
         $html .= sprintf('<td>%s</td>',
             $view->t($square->getStatus()));
@@ -37,7 +34,7 @@ class SquareFormat extends AbstractHelper
         $html .= sprintf('<td>%s</td>',
             $view->prettyTime($square->need('time_block_bookable_max')));
 
-        $html .= '<td class="actions-col no-print">'
+        $html .= '<td class="actions-col no-print" style="white-space: nowrap;">'
             . '<a href="' . $view->url('backend/config/square/edit', ['sid' => $square->need('sid')]) . '" class="unlined gray symbolic symbolic-edit">' . $view->t('Edit') . '</a> &nbsp; '
             . '<a href="' . $view->url('backend/config/square/delete', ['sid' => $square->need('sid')]) . '" class="unlined gray symbolic symbolic-cross">' . $view->t('Delete') . '</a></td>';
 

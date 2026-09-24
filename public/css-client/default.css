@@ -92,6 +92,9 @@ a.cc-own .cc-label { white-space: nowrap; overflow: hidden; text-overflow: ellip
     #calendar .calendar-square-table,
     #calendar .calendar-time-col { width: 56px !important; }
     #calendar .calendar-table .calendar-date-col { padding-left: 2px; }
+
+    .rinks-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    #cf-capacity-ask-names { max-width: 100%; box-sizing: border-box; }
 }
 
 a.whatsapp-share,
@@ -146,3 +149,7 @@ form#bf .sandbox textarea { max-width: 100%; box-sizing: border-box; }
 /* Links */
 
 a:link, a:visited { color: #0066cc; }
+
+/* Layout - Rinks configuration */
+
+.rinks-table td { white-space: nowrap; }

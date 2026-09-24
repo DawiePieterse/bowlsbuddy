@@ -82,8 +82,7 @@ class BehaviourForm extends Form
                 'label' => 'Activation',
                 'value_options' => array(
                     'immediate' => 'Immediately',
-                    'manual-email' => 'Manually (per backend)',
-                    'email' => 'Automatically (per email)',
+                    'manual-email' => 'Manually (by the Secretary)',
                 ),
                 'notes' => 'Sets how new users are activated after registration',
             ),
@@ -98,7 +97,7 @@ class BehaviourForm extends Form
             ),
             'options' => array(
                 'label' => 'Limit bookings',
-                'notes' => 'Set to 0 to allow any number of bookings;<br />can be overridden per square and per user',
+                'notes' => 'Set to 0 to allow any number of bookings;<br />can be overridden per rink and per user',
                 'postfix' => 'simultaneous booking(s) per user',
             ),
         ));

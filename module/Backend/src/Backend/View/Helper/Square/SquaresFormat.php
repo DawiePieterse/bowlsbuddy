@@ -12,10 +12,9 @@ class SquaresFormat extends AbstractHelper
         $view = $this->getView();
         $html = '';
 
-        $html .= '<table class="bordered-table">';
+        $html .= '<table class="bordered-table rinks-table">';
 
         $html .= '<tr class="gray">';
-        $html .= '<th>&nbsp;</th>';
         $html .= '<th>' . $view->t('Name') . '</th>';
         $html .= '<th>' . $view->t('Status') . '</th>';
         $html .= '<th>' . $view->t('Time') . '</th>';

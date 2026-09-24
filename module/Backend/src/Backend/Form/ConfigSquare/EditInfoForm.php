@@ -22,7 +22,7 @@ class EditInfoForm extends Form
             ),
             'options' => array(
                 'label' => 'Info (top)',
-                'notes' => 'Optional info text, that will be displayed <b>above</b> square details',
+                'notes' => 'Optional info text, that will be displayed <b>above</b> rink details',
             ),
         ));
 
@@ -36,7 +36,7 @@ class EditInfoForm extends Form
             ),
             'options' => array(
                 'label' => 'Info (bottom)',
-                'notes' => 'Optional info text, that will be displayed <b>beneath</b> square details',
+                'notes' => 'Optional info text, that will be displayed <b>beneath</b> rink details',
             ),
         ));
 

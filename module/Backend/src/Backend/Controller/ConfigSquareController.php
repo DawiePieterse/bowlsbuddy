@@ -16,6 +16,10 @@ class ConfigSquareController extends AbstractActionController
         $squareManager = @$this->getServiceLocator()->get('Square\Manager\SquareManager');
         $squares = $squareManager->getAll();
 
+        uasort($squares, function($a, $b) {
+            return strnatcmp($a->need('name'), $b->need('name'));
+        });
+
         return array(
             'squares' => $squares,
         );
@@ -76,7 +80,7 @@ class ConfigSquareController extends AbstractActionController
 
                 $squareManager->save($square);
 
-                $this->flashMessenger()->addSuccessMessage('Square has been saved');
+                $this->flashMessenger()->addSuccessMessage('Rink has been saved');
 
                 return $this->redirect()->toRoute('backend/config/square');
             }
@@ -197,7 +201,7 @@ class ConfigSquareController extends AbstractActionController
 
                 $squareManager->save($square);
 
-                $this->flashMessenger()->addSuccessMessage('Square has been saved');
+                $this->flashMessenger()->addSuccessMessage('Rink has been saved');
 
                 return $this->redirect()->toRoute('backend/config/square');
             }
@@ -455,7 +459,7 @@ class ConfigSquareController extends AbstractActionController
                 // There are no bookings, so we can actually delete it
                 $squareManager->delete($square);
 
-                $this->flashMessenger()->addSuccessMessage('Square has been deleted');
+                $this->flashMessenger()->addSuccessMessage('Rink has been deleted');
             }
 
             return $this->redirect()->toRoute('backend/config/square');

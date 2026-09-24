@@ -72,7 +72,7 @@ class EditForm extends Form
             ),
             'options' => array(
                 'label' => 'Capacity',
-                'notes' => 'How many players fit into one square?',
+                'notes' => 'How many players fit onto one rink?',
             ),
         ));
 
@@ -107,7 +107,7 @@ class EditForm extends Form
             ),
             'options' => array(
                 'label' => 'Multiple bookings',
-                'notes' => 'May this square be booked multiple times until its full?',
+                'notes' => 'May this rink be booked multiple times until it is full?',
             ),
         ));
 
@@ -252,7 +252,7 @@ class EditForm extends Form
             ),
             'options' => array(
                 'label' => 'Booking range',
-                'notes' => 'How many days in advance<br>can squares be booked?',
+                'notes' => 'How many days in advance<br>can rinks be booked?',
                 'postfix' => 'Days',
             ),
         ));
@@ -293,8 +293,8 @@ class EditForm extends Form
                 'style' => 'width: 80px;',
             ),
             'options' => array(
-                'label' => 'Label for free squares',
-                'notes' => 'Custom label for free squares in the calendar; default is <b>Free</b>',
+                'label' => 'Label for free rinks',
+                'notes' => 'Custom label for free rinks in the calendar; default is <b>Free</b>',
             ),
         ));
 
