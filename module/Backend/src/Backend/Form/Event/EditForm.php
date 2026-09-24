@@ -97,13 +97,15 @@ class EditForm extends Form
             ),
         ));
 
-        $squareOptions = array(
-            'null' => 'All squares',
-        );
+        $squareOptions = array();
 
         foreach ($this->squareManager->getAll() as $sid => $square) {
             $squareOptions[$sid] = $square->get('name');
         }
+
+        natcasesort($squareOptions);
+
+        $squareOptions = array('null' => 'All rinks') + $squareOptions;
 
         $this->add(array(
             'name' => 'ef-sid',

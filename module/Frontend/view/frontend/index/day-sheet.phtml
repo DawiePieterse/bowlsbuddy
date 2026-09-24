@@ -36,6 +36,7 @@ $names = $this->calendarBookingNames();
         td.rink { font-weight: 700; }
         td.time { white-space: nowrap; }
         td.free { color: #8e8e93; font-style: italic; }
+        td.event { color: #8e3fb8; font-weight: 600; }
         .closed { border: 2px solid #d70015; color: #d70015; font-weight: 700; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; }
         footer { margin-top: 28px; color: #8e8e93; font-size: 11px; text-align: right; }
         @media print {
@@ -85,6 +86,14 @@ $names = $this->calendarBookingNames();
                     </tr>
 
                     <?php foreach ($squares as $sid => $square): ?>
+                        <?php foreach ($this->eventsBySquare[$sid] ?? array() as $event): ?>
+                            <tr>
+                                <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
+                                <td class="time"><?= $this->timeRange($event['start'], $event['end'], '%s - %s') ?></td>
+                                <td class="event" colspan="2"><?= $this->escapeHtml($event['name']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+
                         <?php foreach ($this->bookingsBySquare[$sid] ?? array() as $entry): ?>
                             <?php $players = $names->names($entry['booking']); ?>
                             <tr>
@@ -95,7 +104,7 @@ $names = $this->calendarBookingNames();
                             </tr>
                         <?php endforeach; ?>
 
-                        <?php if (empty($this->bookingsBySquare[$sid]) && ! $closed): ?>
+                        <?php if (empty($this->bookingsBySquare[$sid]) && empty($this->eventsBySquare[$sid]) && ! $closed): ?>
                             <tr>
                                 <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
                                 <td class="time"><?= $this->timeRange($square->need('time_start'), $square->need('time_end'), '%s - %s') ?></td>

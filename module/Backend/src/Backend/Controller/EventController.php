@@ -41,7 +41,10 @@ class EventController extends AbstractActionController
             $eventManager->getSecondsPerDay($events);
         }
 
-        $this->redirectBack()->setOrigin('backend/event');
+        $this->redirectBack()->setOrigin('backend/event', [], ['query' => array_filter([
+            'date-start' => $dateStartParam,
+            'date-end' => $dateEndParam,
+        ])]);
 
         return array(
             'dateStart' => $dateStart,
@@ -122,7 +125,10 @@ class EventController extends AbstractActionController
 
                 $this->flashMessenger()->addSuccessMessage('Event has been saved');
 
-                return $this->redirectBack()->toOrigin();
+                return $this->redirect()->toRoute('backend/event', [], ['query' => [
+                    'date-start' => (new \DateTime($event->need('datetime_start')))->format('Y-m-d'),
+                    'date-end' => (new \DateTime($event->need('datetime_end')))->format('Y-m-d'),
+                ]]);
             }
         } else {
             if ($event) {

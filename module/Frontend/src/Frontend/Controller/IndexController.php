@@ -116,11 +116,39 @@ class IndexController extends AbstractActionController
             }
         }
 
+        $greens = $greenManager->getGreens();
+
+        $dayStart = clone $date;
+        $dayEnd = (clone $date)->modify('+1 day');
+
+        $eventsBySquare = array();
+
+        foreach ($serviceManager->get('Event\Manager\EventManager')->getInRange($dayStart, $dayEnd) as $event) {
+            if ($event->need('status') != 'enabled') {
+                continue;
+            }
+
+            $entry = array(
+                'name' => $event->getMeta('name'),
+                'start' => max(new DateTime($event->need('datetime_start')), $dayStart),
+                'end' => min(new DateTime($event->need('datetime_end')), $dayEnd),
+            );
+
+            foreach ($greens as $squares) {
+                foreach ($squares as $sid => $square) {
+                    if (is_null($event->get('sid')) || $event->get('sid') == $sid) {
+                        $eventsBySquare[$sid][] = $entry;
+                    }
+                }
+            }
+        }
+
         $viewModel = new ViewModel(array(
             'date' => $date,
-            'greens' => $greenManager->getGreens(),
+            'greens' => $greens,
             'closed' => $greenManager->getClosedOn($date),
             'bookingsBySquare' => $bookingsBySquare,
+            'eventsBySquare' => $eventsBySquare,
         ));
 
         $viewModel->setTemplate('frontend/index/day-sheet');
