@@ -357,6 +357,24 @@ class SquareValidator extends AbstractService
             }
         }
 
+        /* Check for one booking per member per day */
+
+        if ($user && $bookable && ! $user->can('calendar.create-single-bookings')) {
+            $dayStart = (clone $dateStart)->setTime(0, 0);
+            $dayEnd = (clone $dateStart)->setTime(23, 59, 59);
+
+            $dayReservations = $this->reservationManager->getInRange($dayStart, $dayEnd);
+            $dayBookings = $this->bookingManager->getByReservations($dayReservations);
+
+            foreach ($dayBookings as $dayBooking) {
+                if ($dayBooking->need('uid') == $user->need('uid') && $dayBooking->need('status') != 'cancelled') {
+                    $bookable = false;
+                    $notBookableReason = 'You can only book <b>one %s per day</b>. You already have a booking on this day.';
+                    break;
+                }
+            }
+        }
+
         /* Check for blocking events */
 
         $events = $this->eventManager->getInRange($dateStart, $dateEnd);
