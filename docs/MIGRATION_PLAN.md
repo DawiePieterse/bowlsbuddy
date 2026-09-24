@@ -20,13 +20,14 @@ the issues in section 2 are fixed in the rebuild only.
 | | Current code | Rebuild |
 |---|---|---|
 | Framework | Zend Framework 2, abandoned since 2019 and patched by hand in `src/Zend/` | Laravel 12 on PHP 8.3+, with security fixes and long-term support |
-| Front end | jQuery 1.12.4, TinyMCE 4 | Blade templates + Livewire/Alpine.js, no build step on the server |
+| Member pages | jQuery 1.12.4, TinyMCE 4 | Blade templates + Livewire/Alpine.js, no build step on the server |
+| Secretary / admin screens | Hand-built ZF2 forms and lists | **Filament** admin panel, generated from the models, with search, filters and forms |
 | Database | `bs_*` tables, `utf8`, with key/value meta tables | **Same `bs_*` tables and columns**, created by Laravel migrations, `utf8mb4`, better indexes |
 | Security | CSRF on 2 forms only, deletes via GET links, bcrypt cost 6 | CSRF on every form, deletes only via POST, bcrypt cost 12, rate-limited login |
 | Tests | None | Tests for every booking rule, run automatically on each push |
 | New club | Manual install + setup wizard | One command: `php artisan club:create` |
 
-**Estimate:** roughly **6–9 weeks** of part-time work for one developer with AI assistance.
+**Estimate:** roughly **5–8 weeks** of part-time work for one developer with AI assistance.
 
 ---
 
@@ -80,9 +81,12 @@ framework.
 
 ## 4. Target stack
 
+**Decided: Laravel 12 + Filament.**
+
 | Option | Verdict |
 |---|---|
-| **Laravel 12 (recommended)** | Runs on shared PHP hosting. CSRF, auth, rate limiting, validation, migrations and testing are built in. Eloquent models map directly onto `bs_*` tables with their own primary keys (`bid`, `sid`...). Large community and long support. |
+| **Laravel 12 + Filament (chosen)** | Same language as the current app, so the booking rules port almost line by line and can be tested against it. Runs on shared PHP hosting. CSRF, auth, rate limiting, validation, migrations and testing are built in. Eloquent models map directly onto `bs_*` tables with their own primary keys (`bid`, `sid`...). Large community and long support. Filament generates the Secretary's admin screens from the models. |
+| Django (Python) | Equally complete, with a strong built-in admin, but needs Python hosting and a translation of the PHP rules. Laravel + Filament gives the same admin benefit. |
 | Laminas MVC (ZF2's successor) | Quickest port of the old code, but keeps the dated architecture and lack of tests. With no users to protect, there's no reason to take the shortcut. |
 | Symfony | Excellent, but more setup than this app needs. |
 | JavaScript stack (Next.js etc.) | Won't run on PHP-only hosting and pushes a different data model. Rejected. |
@@ -91,6 +95,13 @@ framework.
 - **PHP 8.3+**, **Laravel 12**, **Eloquent** models on the `bs_*` tables.
 - **Blade + Livewire 3** for interactive parts (booking pop-up, calendar paging), **Alpine.js** for small
   touches. Assets are built with Vite in CI and shipped as static files.
+- **Filament** for the Secretary / admin panel at `/admin`: resources for members, bookings, events, rinks and
+  settings pages. It uses the same Laravel policies and privileges, and its assets are published as static
+  files, so there's still no build step on the server. Needs the PHP `intl` extension, which the current app
+  already requires.
+- Member-facing pages (greens overview, green calendar, booking pop-up, day sheet) stay **custom Blade +
+  Livewire**, so they look and behave exactly as they do now. The Secretary's green open/close and WhatsApp
+  invite buttons stay on the greens page, as today.
 - **Pest** (tests), **Pint** (code style), **Larastan/PHPStan** (static checks), **GitHub Actions** (CI).
 - **Sessions and cache in the database**, because shared hosts can wipe file storage.
 - **Time zone `Africa/Johannesburg`**; the stored times stay local wall-clock times, as today.
@@ -236,7 +247,13 @@ new app's tests.
 
 **Done when:** Playwright tests pass for the booking flow at phone (390 px) and desktop (1200 px) widths.
 
-### Phase 4: Secretary, admin and setup (≈ 2 weeks)
+### Phase 4: Secretary, admin and setup (≈ 1 week)
+- [ ] Filament panel with access limited by privileges (`admin.see-menu` to enter, then per resource).
+- [ ] Filament resources: **Members** (with "activate" and "set temporary password" actions), **Bookings**,
+  **Events** (rink / Green A / Green B / all rinks selector), **Rinks**.
+- [ ] Filament settings pages: names and text, info and help pages, behaviour, terms and privacy uploads.
+- [ ] Green open/close, WhatsApp invite and day sheet on the greens page (custom, as today).
+- [ ] `club:create` command.
 - [ ] Every "Secretary / admin" and "New club setup" item in section 7.
 
 **Done when:** a new club can be created with one command, and the Secretary's whole day (close a green, add
@@ -250,7 +267,7 @@ an event, print the day sheet, reset a password) passes as a browser test.
 - [ ] Automatic daily database backups, with a test restore.
 - [ ] Archive the old ZF2 code: tag it in git, then remove it from the main branch.
 
-**Total: roughly 6–9 weeks part-time.**
+**Total: roughly 5–8 weeks part-time.**
 
 ---
 
@@ -282,13 +299,14 @@ an event, print the day sheet, reset a password) passes as a browser test.
 | A rule behaves slightly differently from the current app | Medium | Reference values from the current app (5.3) used as test expectations |
 | Shared hosting blocks something Laravel needs | Medium | Test deploy in Phase 1, before any feature work |
 | The rebuild takes longer than planned | Medium | Phases end in something that runs; features the club doesn't need stay out |
+| A Filament or Livewire major upgrade changes things | Low | Pin major versions in `composer.json`; upgrade deliberately with the test suite |
 | The first club wants a dropped feature (e.g. payments) | Low | The old schema and code show how it worked; add it as its own phase |
 
 ---
 
 ## 12. Decisions needed
 
-1. **Laravel** (recommended)?
+1. ~~**Framework?**~~ **Decided: Laravel 12 + Filament.**
 2. **Same repository** (`next/` folder, old code removed at launch) or a **new repository**?
 3. **Hosting for launch:** InfinityFree for the LCE trial, or paid hosting from the start?
 4. **Dropped features:** confirm pricing, products, coupons, bills, emails and repeating bookings can stay
