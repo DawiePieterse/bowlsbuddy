@@ -15,6 +15,24 @@ $this->setup(array(
     <?php endif; ?>
 </div>
 
+<?php if ($this->user && $this->user->can('admin.user')): ?>
+    <?php
+
+    $inviteText = implode("\n", array(
+        '*' . $this->option('client.name.full') . ' - ' . $this->t('rink bookings') . '*',
+        $this->t('You are invited to book practice rinks online.'),
+        $this->t('Register here with your name, email address and a password of your choice:'),
+        $this->serverUrl($this->url('user/registration')),
+        $this->t('Once registered, choose an open green and book a rink.'),
+    ));
+
+    ?>
+    <div id="greens-invite">
+        <a href="https://wa.me/?text=<?= rawurlencode($inviteText) ?>" target="_blank" rel="noopener" class="default-button whatsapp-share"><?= $this->t('Invite members via WhatsApp') ?></a>
+        <span class="gray"><?= $this->t('Sends the registration link; you choose the recipients in WhatsApp.') ?></span>
+    </div>
+<?php endif; ?>
+
 <div class="separator separator-line"></div>
 
 <h1><?= $this->t('Choose a green') ?></h1>
