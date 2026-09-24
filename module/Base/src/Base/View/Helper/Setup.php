@@ -32,7 +32,7 @@ class Setup extends AbstractHelper
                 $this->getView()->placeholder('back-title')->set($view->translate($title));
             } else {
                 $this->getView()->placeholder('back-href')->set($view->basePath('/'));
-                $this->getView()->placeholder('back-title')->set($view->translate('Calendar'));
+                $this->getView()->placeholder('back-title')->set($view->translate('Greens'));
             }
         }
 

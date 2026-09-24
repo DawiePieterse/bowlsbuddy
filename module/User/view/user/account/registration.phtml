@@ -15,16 +15,13 @@ $this->headScript()->appendFile($this->basePath('js/controller/user/registration
 
     <div class="separator-small"></div>
 
-    <h2><?= sprintf($this->t('Welcome to our %s'), $this->option('service.name.full')) ?></h2>
+    <h2><?= $this->escapeHtml(sprintf($this->t('Welcome to %s rink bookings'), $this->option('client.name.full'))) ?></h2>
 
     <div class="separator-small"></div>
 
     <p>
-        <?= sprintf(
-            $this->t('You probably guessed it: To use our service, that is to book spare %s online, you need to create your own user account first.'),
-            $this->option('subject.square.type.plural')) ?>
-
-        <?= $this->t('The registration is of course free of cost and nonbinding.') ?>
+        <?= $this->t('Create your account to book practice rinks online. Registration is free.') ?>
+        <?= $this->t('Once registered, choose an open green and book a rink for yourself and your playing partner.') ?>
     </p>
 
     <div class="separator separator-line"></div>
