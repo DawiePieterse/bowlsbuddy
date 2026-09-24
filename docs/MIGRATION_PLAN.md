@@ -230,10 +230,11 @@ new app's tests.
 - [ ] Models, `HasMeta` trait, relationships, seeders (LCE: greens A and B, 6 rinks each, 12:00–17:00,
   60-minute slots, 2 players).
 - [ ] Auth on `bs_users` (email + `pw`, status checks). CI with Pint, PHPStan and Pest.
-- [ ] Test deploy of a "hello world" build to the target host, to confirm shared hosting runs Laravel
-  (storage paths, no symlinks, PHP extensions).
+- [ ] Test deploy of a "hello world" build to **InfinityFree** (section 9.1): zip upload, `public/` into
+  `htdocs/`, database sessions, uploads without a storage symlink, and the maintenance page running
+  migrations.
 
-**Done when:** CI is green, and the seeded app runs on the target host.
+**Done when:** CI is green, and the seeded app runs on InfinityFree.
 
 ### Phase 2: booking rules (≈ 1–2 weeks)
 - [ ] Reference values captured from the current app (5.3).
@@ -254,7 +255,8 @@ new app's tests.
   **Events** (rink / Green A / Green B / all rinks selector), **Rinks**.
 - [ ] Filament settings pages: names and text, info and help pages, behaviour, terms and privacy uploads.
 - [ ] Green open/close, WhatsApp invite and day sheet on the greens page (custom, as today).
-- [ ] `club:create` command.
+- [ ] `club:create` command (for paid hosting), plus a **first-run setup page** asking the same questions,
+  shown only while there are no users (for InfinityFree, which has no command line).
 - [ ] Every "Secretary / admin" and "New club setup" item in section 7.
 
 **Done when:** a new club can be created with one command, and the Secretary's whole day (close a green, add
@@ -262,10 +264,12 @@ an event, print the day sheet, reset a password) passes as a browser test.
 
 ### Phase 5: launch at LCE (≈ 1 week, plus a short trial)
 - [ ] Security check: go through section 6 point by point and run `composer audit`.
-- [ ] Deploy to production hosting; create LCE with `club:create`; upload Business Terms and Privacy Policy.
+- [ ] Deploy to InfinityFree with the zip build; set up LCE on the first-run page; upload Business Terms and
+  Privacy Policy.
 - [ ] Trial with the Secretary and a few members for 1–2 weeks, then invite everyone (WhatsApp invite
   button).
-- [ ] Automatic daily database backups, with a test restore.
+- [ ] Backups: the Secretary or you download a backup from the admin panel each week (InfinityFree has no
+  scheduled jobs), and one restore is tested on a local copy.
 - [ ] Archive the `bowlsbuddy` repository on GitHub (read-only). It stays available as the reference and for
   its history.
 
@@ -275,10 +279,33 @@ an event, print the day sheet, reset a password) passes as a browser test.
 
 ## 9. Hosting and more clubs
 
-- **LCE only:** InfinityFree can work (upload a zip, as today), but it has no SSH, cron or guaranteed uptime.
-  Fine for a trial.
-- **Paying clubs:** use paid PHP hosting with SSH, daily backups, PHP 8.3 and MySQL 8, or a small VPS with
-  Laravel Forge or Ploi. Budget roughly R100–R300 per month.
+**Decided: InfinityFree until the first club signs up**, then move to paid hosting before that club goes live.
+
+### 9.1 Working within InfinityFree's limits
+
+| InfinityFree limit | How the rebuild handles it |
+|---|---|
+| No SSH, Composer or command line; files go up through the browser File Manager | A build script (GitHub Actions or local) makes a ready-to-upload zip with `vendor/` and built assets. Contents of `public/` go into `htdocs/`, everything else next to it, as with the current deploy. |
+| Can't run `php artisan migrate` | Admin-only **Maintenance** page in Filament (`admin.config` + confirmation) runs pending migrations and clears caches. |
+| Can't run `club:create` | First-run setup page, shown only while there are no users. |
+| No cron / scheduled jobs; automated requests are blocked by its bot protection | Nothing depends on a schedule: caches clear when data changes. Backups are a **Download backup** button (SQL dump) in the admin panel, done weekly. |
+| `symlink()` may be unavailable | Uploaded PDFs are served through a route instead of the `storage:link` symlink. |
+| `mail()` disabled | Not needed; the app sends no email. |
+| No remote database access | Database changes only through migrations (Maintenance page) or phpMyAdmin. |
+| No uptime guarantee, resource limits | Acceptable for LCE while it's free; the reason to move before charging anyone. |
+
+Laravel is set up for this from Phase 1, so moving hosts later needs no code changes.
+
+### 9.2 When the first club signs up
+
+- Move to paid PHP hosting with SSH, automatic daily backups, PHP 8.3 and MySQL 8, or a small VPS with
+  Laravel Forge or Ploi. Budget roughly R100–R300 per month; add it to that club's price.
+- Move LCE over at the same time: download a backup, import it on the new host, upload the same build, and
+  point the address at it. About an hour, with no code changes.
+- Switch backups to the host's automatic daily backups, and use `club:create` and SSH deploys from then on.
+
+### 9.3 More clubs
+
 - **One install per club:** its own database and subdomain, all running the same code and updated together
   by a deploy script.
 - **More than ~10 clubs:** consider one shared install with a `club_id` on each table. That is a
@@ -311,7 +338,7 @@ an event, print the day sheet, reset a password) passes as a browser test.
 1. ~~**Framework?**~~ **Decided: Laravel 12 + Filament.**
 2. ~~**Repository?**~~ **Decided: a new repository.** The current `bowlsbuddy` repository is kept unchanged as
    the reference, and archived once the rebuild is live.
-3. **Hosting for launch:** InfinityFree for the LCE trial, or paid hosting from the start?
+3. ~~**Hosting?**~~ **Decided: InfinityFree** until the first club signs up, then paid hosting (section 9).
 4. **Dropped features:** confirm pricing, products, coupons, bills, emails and repeating bookings can stay
    out.
 5. ~~**The current app:** keep it only as a reference, or launch it at LCE?~~ **Decided: reference only.** It
