@@ -224,7 +224,8 @@ new app's tests.
 ## 8. Phases
 
 ### Phase 1: foundation (≈ 1 week)
-- [ ] New Laravel 12 app. Decide where it lives: a `next/` folder here, or a new repository.
+- [ ] New GitHub repository for the Laravel 12 + Filament app, private, with this plan copied in as
+  `docs/PLAN.md`. This repository (`bowlsbuddy`) stays as the read-only reference.
 - [ ] Migrations creating the tables in 5.1 with the improvements in 5.2.
 - [ ] Models, `HasMeta` trait, relationships, seeders (LCE: greens A and B, 6 rinks each, 12:00–17:00,
   60-minute slots, 2 players).
@@ -265,7 +266,8 @@ an event, print the day sheet, reset a password) passes as a browser test.
 - [ ] Trial with the Secretary and a few members for 1–2 weeks, then invite everyone (WhatsApp invite
   button).
 - [ ] Automatic daily database backups, with a test restore.
-- [ ] Archive the old ZF2 code: tag it in git, then remove it from the main branch.
+- [ ] Archive the `bowlsbuddy` repository on GitHub (read-only). It stays available as the reference and for
+  its history.
 
 **Total: roughly 5–8 weeks part-time.**
 
@@ -307,7 +309,8 @@ an event, print the day sheet, reset a password) passes as a browser test.
 ## 12. Decisions needed
 
 1. ~~**Framework?**~~ **Decided: Laravel 12 + Filament.**
-2. **Same repository** (`next/` folder, old code removed at launch) or a **new repository**?
+2. ~~**Repository?**~~ **Decided: a new repository.** The current `bowlsbuddy` repository is kept unchanged as
+   the reference, and archived once the rebuild is live.
 3. **Hosting for launch:** InfinityFree for the LCE trial, or paid hosting from the start?
 4. **Dropped features:** confirm pricing, products, coupons, bills, emails and repeating bookings can stay
    out.
