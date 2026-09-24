@@ -58,6 +58,10 @@ a.green-cell-full:hover { background-color: #dcdce2; }
 .green-heading-name { font-size: 18px; font-weight: bold; margin-left: 12px; vertical-align: middle; }
 .green-closed-banner { margin-top: 12px; padding: 12px; border-radius: 8px; color: #FFF; background-color: #d70015; font-weight: bold; text-align: center; }
 
+a.cc-single .cc-label,
+a.cc-multiple .cc-label,
+a.cc-own .cc-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; box-sizing: border-box; width: 0; min-width: 100%; }
+
 .cc-green-closed { cursor: default; color: #FFF; background-color: #d70015; font-weight: bold; }
 
 @media (max-width: 768px) {

@@ -110,7 +110,7 @@ class CalendarController extends AbstractActionController
             $dateNow->setTime(0, 0);
         }
 
-        if ($user && $squareManager->hasOneWithPrivateNames()) {
+        if ($user) {
             $getBookingUsers = true;
         }
 

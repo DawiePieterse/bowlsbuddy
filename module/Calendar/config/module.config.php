@@ -44,6 +44,7 @@ return array(
             'CalendarCellRenderFree' => 'Calendar\View\Helper\Cell\Render\Free',
             'CalendarCellRenderFreeForPrivileged' => 'Calendar\View\Helper\Cell\Render\FreeForPrivileged',
 
+            'CalendarBookingNames' => 'Calendar\View\Helper\BookingNames',
             'CalendarDateRow' => 'Calendar\View\Helper\DateRow',
             'CalendarSquareRow' => 'Calendar\View\Helper\SquareRow',
             'CalendarSquareTable' => 'Calendar\View\Helper\SquareTable',

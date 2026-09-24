@@ -28,10 +28,8 @@ class OccupiedForVisitors extends AbstractHelper
             $reservation = current($reservations);
             $booking = $reservation->needExtra('booking');
 
-            if ($square->getMeta('public_names', 'false') == 'true') {
-                $cellLabel = $booking->getMeta('custom-name') ?: $booking->needExtra('user')->need('alias');
-            } else if ($square->getMeta('private_names', 'false') == 'true' && $user) {
-                $cellLabel = $booking->getMeta('custom-name') ?: $booking->needExtra('user')->need('alias');
+            if ($user || $square->getMeta('public_names', 'false') == 'true') {
+                $cellLabel = $view->calendarBookingNames($booking);
             } else {
                 $cellLabel = null;
             }
@@ -47,13 +45,13 @@ class OccupiedForVisitors extends AbstractHelper
                         $cellLabel = $this->view->t('Occupied');
                     }
 
-                    return $view->calendarCellLink($view->escapeHtml($cellLabel), $view->url('square', [], $cellLinkParams), 'cc-single' . $cellGroup, null, $cellStyle);
+                    return $view->calendarCellLink($cellLabel, $view->url('square', [], $cellLinkParams), 'cc-single' . $cellGroup, null, $cellStyle);
                 case 'subscription':
                     if (! $cellLabel) {
                         $cellLabel = $this->view->t('Subscription');
                     }
 
-                    return $view->calendarCellLink($view->escapeHtml($cellLabel), $view->url('square', [], $cellLinkParams), 'cc-multiple' . $cellGroup, null, $cellStyle);
+                    return $view->calendarCellLink($cellLabel, $view->url('square', [], $cellLinkParams), 'cc-multiple' . $cellGroup, null, $cellStyle);
             }
         }
     }
