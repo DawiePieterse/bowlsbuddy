@@ -8,6 +8,9 @@ clubs.
 carry over**, so this is a clean rebuild: no data migration, no running old and new side by side, and no
 rollback plan. The current code serves as the **reference for how everything should behave**.
 
+**Decided:** the current app will **not be launched**. It is kept only as the reference, so no fixes are made to it;
+the issues in section 2 are fixed in the rebuild only.
+
 **Status:** proposal. No code has changed yet.
 
 ---
@@ -290,5 +293,5 @@ an event, print the day sheet, reset a password) passes as a browser test.
 3. **Hosting for launch:** InfinityFree for the LCE trial, or paid hosting from the start?
 4. **Dropped features:** confirm pricing, products, coupons, bills, emails and repeating bookings can stay
    out.
-5. **The current app:** keep it only as a reference, or launch it at LCE while the rebuild happens? If you
-   launch it, first fix the time zone, the delete links and the password cost (about 1–2 days).
+5. ~~**The current app:** keep it only as a reference, or launch it at LCE?~~ **Decided: reference only.** It
+   won't be launched or fixed; LCE's first live system will be the rebuild.
