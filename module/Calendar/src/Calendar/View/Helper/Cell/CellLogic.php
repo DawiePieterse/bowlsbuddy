@@ -2,10 +2,18 @@
 
 namespace Calendar\View\Helper\Cell;
 
+use Square\Manager\GreenManager;
 use Zend\View\Helper\AbstractHelper;
 
 class CellLogic extends AbstractHelper
 {
+
+    protected $greenManager;
+
+    public function __construct(GreenManager $greenManager)
+    {
+        $this->greenManager = $greenManager;
+    }
 
     public function __invoke($walkingDate, $walkingTime, $timeBlock, $now, $square, $user, $reservationsForCol, $eventsForCol)
     {
@@ -33,6 +41,10 @@ class CellLogic extends AbstractHelper
             if (! ($user && $user->can('calendar.see-past'))) {
                 return $view->calendarCell($this->view->t('Past'), 'cc-over');
             }
+        }
+
+        if ($this->greenManager->isSquareClosed($square, $walkingDate)) {
+            return $view->calendarCell($this->view->t('Closed'), 'cc-green-closed');
         }
 
         $minBookingRange = $square->get('min_range_book');

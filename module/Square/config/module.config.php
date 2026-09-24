@@ -77,6 +77,7 @@ return array(
     'service_manager' => array(
         'factories' => array(
             'Square\Manager\SquareManager' => 'Square\Manager\SquareManagerFactory',
+            'Square\Manager\GreenManager' => 'Square\Manager\GreenManagerFactory',
             'Square\Manager\SquarePricingManager' => 'Square\Manager\SquarePricingManagerFactory',
             'Square\Manager\SquareProductManager' => 'Square\Manager\SquareProductManagerFactory',
 

@@ -1,0 +1,76 @@
+<?php
+
+$this->setup(array(
+    'title' => 'Greens',
+    'panel' => 'centered-panel large-sized',
+));
+
+?>
+
+<div id="greens-userpanel">
+    <?php if ($this->user): ?>
+        <?= $this->partial('frontend/index/userpanel.online.phtml', ['user' => $this->user]) ?>
+    <?php else: ?>
+        <?= $this->partial('frontend/index/userpanel.offline.phtml') ?>
+    <?php endif; ?>
+</div>
+
+<div class="separator separator-line"></div>
+
+<h1><?= $this->t('Choose a green') ?></h1>
+
+<p class="gray"><?= $this->t('Select an open green on the day you want to play to see its rinks and book.') ?></p>
+
+<?php if (! $this->greens): ?>
+    <?= $this->message('There are no squares available', 'info') ?>
+<?php elseif (! $this->days): ?>
+    <?= $this->message('There are no practice days coming up', 'info') ?>
+<?php else: ?>
+
+<table class="greens-table">
+    <tr>
+        <th><?= $this->t('Day') ?></th>
+        <?php foreach ($this->greens as $green => $squares): ?>
+            <th><?= $this->escapeHtml(sprintf($this->t('Green %s'), $green)) ?></th>
+        <?php endforeach; ?>
+    </tr>
+
+    <?php foreach ($this->days as $day): ?>
+        <?php $date = $day['date']; ?>
+        <tr>
+            <td class="greens-day">
+                <b><?= $this->t($date->format('l')) ?></b><br>
+                <span class="gray"><?= $this->dateFormat($date, IntlDateFormatter::MEDIUM) ?></span>
+            </td>
+
+            <?php foreach ($this->greens as $green => $squares): ?>
+                <?php $closed = $day['closed'][$green]; ?>
+                <td>
+                    <?php if ($closed): ?>
+                        <div class="green-cell green-cell-closed"><?= $this->t('Closed') ?></div>
+                    <?php else: ?>
+                        <a class="green-cell green-cell-open" href="<?= $this->url('frontend', [], ['query' => [
+                            'date' => $date->format('Y-m-d'),
+                            'squares' => implode(',', array_keys($squares)),
+                        ]]) ?>">
+                            <?= $this->t('Open') ?>
+                            <span class="green-cell-rinks"><?= sprintf($this->t('%s rinks'), count($squares)) ?></span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if ($this->csrfHash): ?>
+                        <form method="post" action="<?= $this->url('green-toggle') ?>" class="green-toggle">
+                            <input type="hidden" name="csrf" value="<?= $this->escapeHtmlAttr($this->csrfHash) ?>">
+                            <input type="hidden" name="green" value="<?= $this->escapeHtmlAttr($green) ?>">
+                            <input type="hidden" name="date" value="<?= $date->format('Y-m-d') ?>">
+                            <input type="hidden" name="closed" value="<?= $closed ? '0' : '1' ?>">
+                            <input type="submit" class="default-button" value="<?= $this->t($closed ? 'Open green' : 'Close green') ?>">
+                        </form>
+                    <?php endif; ?>
+                </td>
+            <?php endforeach; ?>
+        </tr>
+    <?php endforeach; ?>
+</table>
+
+<?php endif; ?>

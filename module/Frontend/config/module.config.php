@@ -13,6 +13,16 @@ return array(
                     ),
                 ),
             ),
+            'green-toggle' => array(
+                'type' => 'Literal',
+                'options' => array(
+                    'route' => '/greens/toggle',
+                    'defaults' => array(
+                        'controller' => 'Frontend\Controller\Index',
+                        'action' => 'green-toggle',
+                    ),
+                ),
+            ),
         ),
     ),
 

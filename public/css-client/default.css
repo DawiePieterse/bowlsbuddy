@@ -24,6 +24,38 @@ a.cc-conflict:link,
 a.cc-conflict:visited { background-color: #1d3c5c; }
 a.cc-conflict:hover { background-color: #1d3c5c; }
 
+/* Layout - Greens */
+
+.greens-table { width: 100%; border-collapse: separate; border-spacing: 8px; margin-top: 16px; }
+.greens-table th { text-align: center; font-size: 16px; padding-bottom: 4px; }
+.greens-table td { vertical-align: top; text-align: center; }
+.greens-table td.greens-day { text-align: left; white-space: nowrap; vertical-align: middle; }
+
+.green-cell { display: block; padding: 12px 8px; border-radius: 8px; font-weight: bold; font-size: 15px; }
+a.green-cell-open:link,
+a.green-cell-open:visited { color: #FFF; background-color: #34c759; text-decoration: none; }
+a.green-cell-open:hover { background-color: #248a3d; }
+.green-cell-rinks { display: block; font-weight: normal; font-size: 12px; }
+.green-cell-closed { color: #FFF; background-color: #d70015; text-transform: uppercase; letter-spacing: 1px; }
+
+.green-toggle { margin-top: 6px; }
+
+#greens-userpanel { text-align: center; }
+#greens-userpanel table { display: inline-table; }
+
+@media (max-width: 768px) {
+    #greens-userpanel table,
+    #greens-userpanel tbody,
+    #greens-userpanel tr { display: block; }
+    #greens-userpanel td { display: inline-block; padding: 4px !important; border: none !important; }
+}
+
+#green-heading { margin: 16px; padding: 12px 16px; }
+.green-heading-name { font-size: 18px; font-weight: bold; margin-left: 12px; vertical-align: middle; }
+.green-closed-banner { margin-top: 12px; padding: 12px; border-radius: 8px; color: #FFF; background-color: #d70015; font-weight: bold; text-align: center; }
+
+.cc-green-closed { cursor: default; color: #FFF; background-color: #d70015; font-weight: bold; }
+
 /* Layout - Alternate Calendar */
 
 .cc-range-member a {

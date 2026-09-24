@@ -4,6 +4,20 @@ $this->headScript()->appendFile($this->basePath('js/controller/frontend/index.mi
 
 ?>
 
+<div id="green-heading" class="panel no-print">
+    <a href="<?= $this->url('frontend') ?>" class="default-button"><?= $this->t('All greens') ?></a>
+
+    <?php if ($this->green !== null): ?>
+        <span class="green-heading-name"><?= $this->escapeHtml(sprintf($this->t('Green %s'), $this->green)) ?></span>
+
+        <?php if ($this->greenClosed): ?>
+            <div class="green-closed-banner">
+                <?= $this->escapeHtml(sprintf($this->t('Green %s is closed on %s'), $this->green, $this->dateFormat($this->dateStart, IntlDateFormatter::FULL))) ?>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
+</div>
+
 <div id="calendar-toolbar" class="no-print">
     <div id="calendar-toolbar-datepicker" class="panel">
         <?= $this->partial('frontend/index/datepicker.phtml', ['dateStart' => $this->dateStart, 'dateNow' => $this->dateNow, 'squaresFilter' => $this->squaresFilter]) ?>

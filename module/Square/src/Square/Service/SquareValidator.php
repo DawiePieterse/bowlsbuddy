@@ -11,6 +11,7 @@ use DateTime;
 use Event\Manager\EventManager;
 use Exception;
 use RuntimeException;
+use Square\Manager\GreenManager;
 use Square\Manager\SquareManager;
 use User\Manager\UserSessionManager;
 
@@ -22,6 +23,7 @@ class SquareValidator extends AbstractService
     protected $eventManager;
     protected $squareManager;
     protected $optionManager;
+    protected $greenManager;
     protected $user;
 
     public function __construct(
@@ -31,7 +33,9 @@ class SquareValidator extends AbstractService
         SquareManager $squareManager,
         UserSessionManager $userSessionManager,
         OptionManager $optionManager,
+        GreenManager $greenManager,
     ) {
+        $this->greenManager = $greenManager;
         $this->bookingManager = $bookingManager;
         $this->reservationManager = $reservationManager;
         $this->eventManager = $eventManager;
@@ -228,6 +232,12 @@ class SquareValidator extends AbstractService
                     throw new RuntimeException('The passed date has been hidden from the calendar');
                 }
             }
+        }
+
+        /* Check for closed green */
+
+        if ($this->greenManager->isSquareClosed($square, $dateStart)) {
+            throw new RuntimeException(sprintf($this->t('Green %s is closed on this day'), $this->greenManager->getGreenOf($square)));
         }
 
         /* Return validation byproducts */

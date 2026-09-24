@@ -36,7 +36,6 @@ return array(
         'invokables' => array(
             'CalendarCell' => 'Calendar\View\Helper\Cell\Cell',
             'CalendarCellLink' => 'Calendar\View\Helper\Cell\CellLink',
-            'CalendarCellLogic' => 'Calendar\View\Helper\Cell\CellLogic',
 
             'CalendarCellRenderCell' => 'Calendar\View\Helper\Cell\Render\Cell',
             'CalendarCellRenderEvent' => 'Calendar\View\Helper\Cell\Render\Event',
@@ -61,7 +60,8 @@ return array(
         ),
 
         'factories' => array(
-            'CalendarCellRenderOccupied' => 'Calendar\View\Helper\Cell\Render\OccupiedFactory',
+            'CalendarCellLogic' => 'Calendar\View\Helper\Cell\CellLogicFactory',
+            'CalendarCellRenderOccupied'=> 'Calendar\View\Helper\Cell\Render\OccupiedFactory',
             'CalendarCellRenderOccupiedForPrivileged' => 'Calendar\View\Helper\Cell\Render\OccupiedForPrivilegedFactory',
             'CalendarCellRenderOccupiedForVisitors' => 'Calendar\View\Helper\Cell\Render\OccupiedForVisitorsFactory',
         ),
