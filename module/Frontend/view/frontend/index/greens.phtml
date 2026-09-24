@@ -43,6 +43,12 @@ $this->setup(array(
                 <span class="gray"><?= $this->dateFormat($date, IntlDateFormatter::MEDIUM) ?></span>
             </td>
 
+            <?php if (! $day['practice']): ?>
+                <td colspan="<?= count($this->greens) ?>">
+                    <div class="greens-no-practice"><?= $this->t('No practice') ?></div>
+                </td>
+            <?php else: ?>
+
             <?php foreach ($this->greens as $green => $squares): ?>
                 <?php $closed = $day['closed'][$green]; ?>
                 <td>
@@ -69,6 +75,7 @@ $this->setup(array(
                     <?php endif; ?>
                 </td>
             <?php endforeach; ?>
+            <?php endif; ?>
         </tr>
     <?php endforeach; ?>
 </table>

@@ -56,6 +56,27 @@ a.green-cell-open:hover { background-color: #248a3d; }
 
 .cc-green-closed { cursor: default; color: #FFF; background-color: #d70015; font-weight: bold; }
 
+.greens-no-practice { color: #86868b; background-color: #f5f5f7; border-radius: 8px; padding: 12px 8px; font-size: 13px; }
+
+@media (max-width: 768px) {
+    #green-heading { margin: 8px; }
+
+    #calendar-toolbar-userpanel table,
+    #calendar-toolbar-userpanel tbody,
+    #calendar-toolbar-userpanel tr { display: block; }
+    #calendar-toolbar-userpanel td { display: inline-block; padding: 4px !important; border: none !important; }
+    #calendar-toolbar-userpanel { margin-left: 8px; margin-right: 8px; }
+    #calendar-toolbar-datepicker,
+    #calendar-toolbar-userpanel { max-width: calc(100% - 16px); box-sizing: border-box; }
+    #calendar-toolbar-datepicker { padding-left: 12px; padding-right: 12px; }
+
+    #calendar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px; }
+    #calendar .calendar-square-col,
+    #calendar .calendar-square-table,
+    #calendar .calendar-time-col { width: 56px !important; }
+    #calendar .calendar-table .calendar-date-col { padding-left: 2px; }
+}
+
 /* Layout - Alternate Calendar */
 
 .cc-range-member a {

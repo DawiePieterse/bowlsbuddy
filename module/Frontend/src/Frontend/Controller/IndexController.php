@@ -97,30 +97,17 @@ class IndexController extends AbstractActionController
 
         $greens = $greenManager->getGreens();
 
-        $maxBookRange = 0;
-
-        foreach ($greens as $squares) {
-            foreach ($squares as $square) {
-                $maxBookRange = max($maxBookRange, (int) $square->get('range_book'));
-            }
-        }
-
-        $daysAhead = $maxBookRange ? (int) ceil($maxBookRange / 86400) : 14;
-        $daysAhead = min($daysAhead, 31);
-
         $days = array();
         $day = new DateTime('today');
 
-        for ($i = 0; $i <= $daysAhead; $i++) {
-            if (! $this->isDayHidden($day)) {
-                $closed = array();
+        for ($i = 0; $i < 14; $i++) {
+            $closed = array();
 
-                foreach ($greens as $green => $squares) {
-                    $closed[$green] = $greenManager->isClosed($green, $day);
-                }
-
-                $days[] = array('date' => clone $day, 'closed' => $closed);
+            foreach ($greens as $green => $squares) {
+                $closed[$green] = $greenManager->isClosed($green, $day);
             }
+
+            $days[] = array('date' => clone $day, 'practice' => ! $this->isDayHidden($day), 'closed' => $closed);
 
             $day->modify('+1 day');
         }
