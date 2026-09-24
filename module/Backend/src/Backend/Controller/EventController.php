@@ -104,12 +104,17 @@ class EventController extends AbstractActionController
                 $event->set('datetime_end', $dateEnd->format('Y-m-d H:i:s'));
 
                 $sid = $data['ef-sid'];
+                $green = null;
 
                 if ($sid == 'null') {
+                    $sid = null;
+                } else if (str_starts_with($sid, 'green:')) {
+                    $green = substr($sid, strlen('green:'));
                     $sid = null;
                 }
 
                 $event->set('sid', $sid);
+                $event->setMeta('green', $green);
 
                 $capacity = $data['ef-capacity'];
 
@@ -139,7 +144,7 @@ class EventController extends AbstractActionController
                     'ef-time-start' => $event->needExtra('datetime_start')->format('H:i'),
                     'ef-date-end' => $this->dateFormat($event->needExtra('datetime_end'), \IntlDateFormatter::MEDIUM),
                     'ef-time-end' => $event->needExtra('datetime_end')->format('H:i'),
-                    'ef-sid' =>  $event->get('sid'),
+                    'ef-sid' =>  $event->getMeta('green') ? 'green:' . $event->getMeta('green') : $event->get('sid'),
                     'ef-capacity' =>  $event->get('capacity', 0),
                     'ef-notes' =>  $event->getMeta('notes'),
                 ));

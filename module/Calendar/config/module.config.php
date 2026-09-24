@@ -56,12 +56,12 @@ return array(
             'CalendarReservationsForCol' => 'Calendar\View\Helper\ReservationsForCol',
 
             'CalendarEventsCleanup' => 'Calendar\View\Helper\EventsCleanup',
-            'CalendarEventsForCell' => 'Calendar\View\Helper\EventsForCell',
             'CalendarEventsForCol' => 'Calendar\View\Helper\EventsForCol',
         ),
 
         'factories' => array(
             'CalendarCellLogic' => 'Calendar\View\Helper\Cell\CellLogicFactory',
+            'CalendarEventsForCell' => 'Calendar\View\Helper\EventsForCellFactory',
             'CalendarCellRenderOccupied' => 'Calendar\View\Helper\Cell\Render\OccupiedFactory',
             'CalendarCellRenderOccupiedForPrivileged' => 'Calendar\View\Helper\Cell\Render\OccupiedForPrivilegedFactory',
             'CalendarCellRenderOccupiedForVisitors' => 'Calendar\View\Helper\Cell\Render\OccupiedForVisitorsFactory',

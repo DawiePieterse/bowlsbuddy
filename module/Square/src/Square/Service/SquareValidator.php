@@ -375,7 +375,7 @@ class SquareValidator extends AbstractService
         $events = $this->eventManager->getInRange($dateStart, $dateEnd);
 
         foreach ($events as $event) {
-            if (is_null($event->get('sid')) || $event->get('sid') == $square->need('sid')) {
+            if ($this->greenManager->eventCoversSquare($event, $square)) {
                 $bookable = false;
             }
         }

@@ -4,6 +4,7 @@ namespace Square\Manager;
 
 use Base\Manager\OptionManager;
 use DateTime;
+use Event\Entity\Event;
 use Square\Entity\Square;
 
 /* A rink belongs to the green named by the prefix of its name: "A-1" is on green "A". */
@@ -67,6 +68,18 @@ class GreenManager
         }
 
         return $closed;
+    }
+
+    /* An event covers one rink (sid), one green (no sid, "green" meta) or all rinks. */
+    public function eventCoversSquare(Event $event, Square $square)
+    {
+        if ($event->get('sid')) {
+            return $event->get('sid') == $square->need('sid');
+        }
+
+        $green = $event->getMeta('green');
+
+        return ! $green || $green === $this->getGreenOf($square);
     }
 
     public function isSquareClosed(Square $square, DateTime $date)

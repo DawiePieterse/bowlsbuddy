@@ -4,6 +4,7 @@ namespace Frontend\Controller;
 
 use DateTime;
 use RuntimeException;
+use Square\Manager\GreenManager;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Validator\Csrf;
 use Zend\View\Model\ViewModel;
@@ -136,7 +137,7 @@ class IndexController extends AbstractActionController
 
             foreach ($greens as $squares) {
                 foreach ($squares as $sid => $square) {
-                    if (is_null($event->get('sid')) || $event->get('sid') == $sid) {
+                    if ($greenManager->eventCoversSquare($event, $square)) {
                         $eventsBySquare[$sid][] = $entry;
                     }
                 }
@@ -198,10 +199,10 @@ class IndexController extends AbstractActionController
 
                 foreach ($greens as $green => $squares) {
                     $available[$green] = 0;
-                    $eventNames[$green] = $this->eventNamesFor($blocked, array_keys($squares), $day->getTimestamp());
+                    $eventNames[$green] = $this->eventNamesFor($blocked, $squares, $day->getTimestamp(), $greenManager);
 
                     foreach ($squares as $square) {
-                        if ($this->isRinkAvailable($square, $day->getTimestamp(), $occupancy[$day->format('Y-m-d')][$square->need('sid')] ?? array(), $blocked, $now)) {
+                        if ($this->isRinkAvailable($square, $day->getTimestamp(), $occupancy[$day->format('Y-m-d')][$square->need('sid')] ?? array(), $blocked, $now, $greenManager)) {
                             $available[$green]++;
                         }
                     }
@@ -249,14 +250,14 @@ class IndexController extends AbstractActionController
         return $occupancy;
     }
 
-    /* @return array list of [sid or null for all rinks, start timestamp, end timestamp, name] of enabled events */
+    /* @return array list of [event, start timestamp, end timestamp, name] of enabled events */
     protected function collectBlocked(array $events)
     {
         $blocked = array();
 
         foreach ($events as $event) {
             if ($event->need('status') == 'enabled') {
-                $blocked[] = array($event->get('sid'), $event->needExtra('datetime_start')->getTimestamp(), $event->needExtra('datetime_end')->getTimestamp(), $event->getMeta('name'));
+                $blocked[] = array($event, $event->needExtra('datetime_start')->getTimestamp(), $event->needExtra('datetime_end')->getTimestamp(), $event->getMeta('name'));
             }
         }
 
@@ -264,13 +265,20 @@ class IndexController extends AbstractActionController
     }
 
     /* @return array names of the events on the passed rinks during the day */
-    protected function eventNamesFor(array $blocked, array $sids, $dayTimestamp)
+    protected function eventNamesFor(array $blocked, array $squares, $dayTimestamp, GreenManager $greenManager)
     {
         $names = array();
 
-        foreach ($blocked as list($blockedSid, $blockedStart, $blockedEnd, $name)) {
-            if ((is_null($blockedSid) || in_array($blockedSid, $sids)) && $blockedStart < $dayTimestamp + 86400 && $blockedEnd > $dayTimestamp) {
-                $names[$name] = $name;
+        foreach ($blocked as list($event, $blockedStart, $blockedEnd, $name)) {
+            if ($blockedStart >= $dayTimestamp + 86400 || $blockedEnd <= $dayTimestamp) {
+                continue;
+            }
+
+            foreach ($squares as $square) {
+                if ($greenManager->eventCoversSquare($event, $square)) {
+                    $names[$name] = $name;
+                    break;
+                }
             }
         }
 
@@ -278,9 +286,8 @@ class IndexController extends AbstractActionController
     }
 
     /* A rink is available when at least one of its time slots that day has not started and can still be booked. */
-    protected function isRinkAvailable($square, $dayTimestamp, array $taken, array $blocked, $now)
+    protected function isRinkAvailable($square, $dayTimestamp, array $taken, array $blocked, $now, GreenManager $greenManager)
     {
-        $sid = $square->need('sid');
         $capacity = (int) $square->need('capacity');
         $capacityHeterogenic = $square->need('capacity_heterogenic');
         $timeBlock = (int) $square->need('time_block');
@@ -293,8 +300,8 @@ class IndexController extends AbstractActionController
                 continue;
             }
 
-            foreach ($blocked as list($blockedSid, $blockedStart, $blockedEnd)) {
-                if ((is_null($blockedSid) || $blockedSid == $sid) && $blockedStart < $dayTimestamp + $slotEnd && $blockedEnd > $dayTimestamp + $slotStart) {
+            foreach ($blocked as list($event, $blockedStart, $blockedEnd)) {
+                if ($blockedStart < $dayTimestamp + $slotEnd && $blockedEnd > $dayTimestamp + $slotStart && $greenManager->eventCoversSquare($event, $square)) {
                     continue 2;
                 }
             }

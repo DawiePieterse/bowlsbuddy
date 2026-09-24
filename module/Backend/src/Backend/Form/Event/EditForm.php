@@ -2,6 +2,7 @@
 
 namespace Backend\Form\Event;
 
+use Square\Manager\GreenManager;
 use Square\Manager\SquareManager;
 use Zend\Form\Form;
 use Zend\InputFilter\Factory;
@@ -10,12 +11,14 @@ class EditForm extends Form
 {
 
     protected $squareManager;
+    protected $greenManager;
 
-    public function __construct(SquareManager $squareManager)
+    public function __construct(SquareManager $squareManager, GreenManager $greenManager)
     {
         parent::__construct();
 
         $this->squareManager = $squareManager;
+        $this->greenManager = $greenManager;
     }
 
     public function init()
@@ -105,7 +108,13 @@ class EditForm extends Form
 
         natcasesort($squareOptions);
 
-        $squareOptions = array('null' => 'All rinks') + $squareOptions;
+        $greenOptions = array();
+
+        foreach ($this->greenManager->getGreens() as $green => $squares) {
+            $greenOptions['green:' . $green] = sprintf('Green %s (all %s rinks)', $green, $green);
+        }
+
+        $squareOptions = array('null' => 'All rinks') + $greenOptions + $squareOptions;
 
         $this->add(array(
             'name' => 'ef-sid',

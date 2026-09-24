@@ -62,6 +62,8 @@ class EventFormat extends AbstractHelper
 
         if ($event->get('sid')) {
             $squareLabel = $this->squareManager->get($event->need('sid'))->get('name');
+        } else if ($event->getMeta('green')) {
+            $squareLabel = sprintf($view->t('Green %s'), $event->getMeta('green'));
         } else {
             $squareLabel = $view->t('All');
         }

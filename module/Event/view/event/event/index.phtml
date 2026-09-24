@@ -19,6 +19,8 @@ $this->setup(array(
 
         if ($this->square) {
             echo sprintf('%s %s', $this->option('subject.square.type'), $this->square->need('name'));
+        } else if ($this->event->getMeta('green')) {
+            echo $this->escapeHtml(sprintf($this->t('Green %s'), $this->event->getMeta('green')));
         } else {
             echo sprintf($this->t('All %s'), $this->option('subject.square.type.plural'));
         }
