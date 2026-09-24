@@ -39,6 +39,9 @@ a.green-cell-open:hover { background-color: #248a3d; }
 a.green-cell-full:link,
 a.green-cell-full:visited { color: #6e6e73; background-color: #e8e8ed; text-decoration: none; }
 a.green-cell-full:hover { background-color: #dcdce2; }
+a.green-cell-event:link,
+a.green-cell-event:visited { color: #FFF; background-color: #af52de; text-decoration: none; }
+a.green-cell-event:hover { background-color: #8e3fb8; }
 .green-cell-rinks { display: block; font-weight: normal; font-size: 12px; }
 .green-cell-closed { color: #FFF; background-color: #d70015; text-transform: uppercase; letter-spacing: 1px; }
 

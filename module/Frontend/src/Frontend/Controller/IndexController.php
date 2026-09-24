@@ -194,9 +194,11 @@ class IndexController extends AbstractActionController
         for ($i = 0; $i < 14; $i++) {
             if (! $squareValidator->isDayHidden($day)) {
                 $available = array();
+                $eventNames = array();
 
                 foreach ($greens as $green => $squares) {
                     $available[$green] = 0;
+                    $eventNames[$green] = $this->eventNamesFor($blocked, array_keys($squares), $day->getTimestamp());
 
                     foreach ($squares as $square) {
                         if ($this->isRinkAvailable($square, $day->getTimestamp(), $occupancy[$day->format('Y-m-d')][$square->need('sid')] ?? array(), $blocked, $now)) {
@@ -205,7 +207,7 @@ class IndexController extends AbstractActionController
                     }
                 }
 
-                $days[] = array('date' => clone $day, 'closed' => $greenManager->getClosedOn($day), 'available' => $available);
+                $days[] = array('date' => clone $day, 'closed' => $greenManager->getClosedOn($day), 'available' => $available, 'events' => $eventNames);
             }
 
             $day->modify('+1 day');
@@ -247,18 +249,32 @@ class IndexController extends AbstractActionController
         return $occupancy;
     }
 
-    /* @return array list of [sid or null for all rinks, start timestamp, end timestamp] of enabled events */
+    /* @return array list of [sid or null for all rinks, start timestamp, end timestamp, name] of enabled events */
     protected function collectBlocked(array $events)
     {
         $blocked = array();
 
         foreach ($events as $event) {
             if ($event->need('status') == 'enabled') {
-                $blocked[] = array($event->get('sid'), $event->needExtra('datetime_start')->getTimestamp(), $event->needExtra('datetime_end')->getTimestamp());
+                $blocked[] = array($event->get('sid'), $event->needExtra('datetime_start')->getTimestamp(), $event->needExtra('datetime_end')->getTimestamp(), $event->getMeta('name'));
             }
         }
 
         return $blocked;
+    }
+
+    /* @return array names of the events on the passed rinks during the day */
+    protected function eventNamesFor(array $blocked, array $sids, $dayTimestamp)
+    {
+        $names = array();
+
+        foreach ($blocked as list($blockedSid, $blockedStart, $blockedEnd, $name)) {
+            if ((is_null($blockedSid) || in_array($blockedSid, $sids)) && $blockedStart < $dayTimestamp + 86400 && $blockedEnd > $dayTimestamp) {
+                $names[$name] = $name;
+            }
+        }
+
+        return array_values($names);
     }
 
     /* A rink is available when at least one of its time slots that day has not started and can still be booked. */
