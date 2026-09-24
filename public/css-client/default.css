@@ -77,6 +77,9 @@ a.cc-own .cc-label { white-space: nowrap; overflow: hidden; text-overflow: ellip
 
     #calendar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px; }
 
+    .default-table input[type=text],
+    .default-table input[type=password] { width: 100% !important; max-width: 250px; box-sizing: border-box; }
+
     body > .panel,
     .messages-panel { min-width: 0 !important; max-width: calc(100vw - 16px); box-sizing: border-box; }
     body > .panel { left: 8px !important; width: calc(100vw - 16px); }
