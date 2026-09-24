@@ -28,15 +28,15 @@ $names = $this->calendarBookingNames();
         header h1 { margin: 4px 0 0; font-size: 24px; }
         h2 { font-size: 17px; margin: 22px 0 8px; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th:nth-child(1) { width: 70px; }
-        th:nth-child(2) { width: 150px; }
-        th:nth-child(3) { width: 30%; }
         th, td { border: 1px solid #c7c7cc; padding: 8px 10px; text-align: left; vertical-align: top; }
+        th.rink { width: 64px; }
+        td { height: 44px; }
+        .player { overflow-wrap: anywhere; }
+        td.closed-cell { background: repeating-linear-gradient(135deg, #FFF, #FFF 6px, #f2f2f7 6px, #f2f2f7 12px); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .legend { margin-top: 14px; color: #6e6e73; font-size: 11px; }
         th { background: #f2f2f7; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         td.rink { font-weight: 700; }
-        td.time { white-space: nowrap; }
-        td.free { color: #8e8e93; font-style: italic; }
-        td.event { color: #8e3fb8; font-weight: 600; }
+        td.event, div.event { color: #8e3fb8; font-weight: 600; }
         .closed { border: 2px solid #d70015; color: #d70015; font-weight: 700; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; }
         footer { margin-top: 28px; color: #8e8e93; font-size: 11px; text-align: right; }
         @media print {
@@ -76,46 +76,56 @@ $names = $this->calendarBookingNames();
                 <div class="closed"><?= $this->escapeHtml(sprintf($this->t('CLOSED - Green %s is closed on this day'), $green)) ?></div>
             <?php endif; ?>
 
-            <?php if (! $closed || array_intersect_key($squares, $this->bookingsBySquare)): ?>
+            <?php
+
+            $slots = $this->sheet[$green]['slots'];
+            $rows = $this->sheet[$green]['rows'];
+            $hasBookings = false;
+
+            foreach ($rows as $cells) {
+                foreach ($cells as $cell) {
+                    $hasBookings = $hasBookings || $cell['bookings'];
+                }
+            }
+
+            ?>
+            <?php if ($slots && (! $closed || $hasBookings)): ?>
                 <table>
                     <tr>
-                        <th><?= $this->t('Rink') ?></th>
-                        <th><?= $this->t('Time') ?></th>
-                        <th><?= $this->t('Booked by') ?></th>
-                        <th><?= $this->t('Other players') ?></th>
+                        <th class="rink"><?= $this->t('Rink') ?></th>
+                        <?php foreach ($slots as list($slotStart, $slotEnd)): ?>
+                            <th><?= sprintf('%s - %s', gmdate('H:i', $slotStart), gmdate('H:i', $slotEnd)) ?></th>
+                        <?php endforeach; ?>
                     </tr>
-
                     <?php foreach ($squares as $sid => $square): ?>
-                        <?php foreach ($this->eventsBySquare[$sid] ?? array() as $event): ?>
-                            <tr>
-                                <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
-                                <td class="time"><?= $this->timeRange($event['start'], $event['end'], '%s - %s') ?></td>
-                                <td class="event" colspan="2"><?= $this->escapeHtml($event['name']) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-
-                        <?php foreach ($this->bookingsBySquare[$sid] ?? array() as $entry): ?>
-                            <?php $players = $names->names($entry['booking']); ?>
-                            <tr>
-                                <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
-                                <td class="time"><?= $this->timeRange($entry['reservation']->need('time_start'), $entry['reservation']->need('time_end'), '%s - %s') ?></td>
-                                <td><?= $this->escapeHtml(array_shift($players)) ?></td>
-                                <td><?= $this->escapeHtml(implode(', ', $players)) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-
-                        <?php if (empty($this->bookingsBySquare[$sid]) && empty($this->eventsBySquare[$sid]) && ! $closed): ?>
-                            <tr>
-                                <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
-                                <td class="time"><?= $this->timeRange($square->need('time_start'), $square->need('time_end'), '%s - %s') ?></td>
-                                <td class="free" colspan="2"><?= $this->t('Free') ?></td>
-                            </tr>
-                        <?php endif; ?>
+                        <tr>
+                            <td class="rink"><?= $this->escapeHtml($square->need('name')) ?></td>
+                            <?php foreach ($rows[$sid] as $cell): ?>
+                                <?php if ($cell['events'] && ! $cell['bookings']): ?>
+                                    <td class="event"><?= $this->escapeHtml(implode(', ', $cell['events'])) ?></td>
+                                <?php elseif ($cell['bookings']): ?>
+                                    <td>
+                                        <?php foreach ($cell['bookings'] as $booking): ?>
+                                            <?php foreach ($names->names($booking) as $player): ?>
+                                                <div class="player"><?= $this->escapeHtml($player) ?></div>
+                                            <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                        <?php if ($cell['events']): ?>
+                                            <div class="event"><?= $this->escapeHtml(implode(', ', $cell['events'])) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php else: ?>
+                                    <td class="<?= $closed ? 'closed-cell' : 'free' ?>"></td>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </tr>
                     <?php endforeach; ?>
                 </table>
             <?php endif; ?>
         </section>
     <?php endforeach; ?>
+
+    <p class="legend"><?= $this->t('Empty boxes are free - walk-in players can be written in by hand.') ?></p>
 
     <footer><?= $this->escapeHtml(sprintf($this->t('Printed %s'), $this->dateFormat(new DateTime(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT))) ?></footer>
 

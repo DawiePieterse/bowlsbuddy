@@ -79,13 +79,13 @@ $this->setup(array(
                         ]]) ?>">
                             <?php if ($available): ?>
                                 <?= $this->t('Open') ?>
-                                <span class="green-cell-rinks"><?= sprintf($this->t('%s of %s rinks available'), $available, count($squares)) ?></span>
+                                <span class="green-cell-rinks"><?= sprintf($this->t('%s of %s slots free'), $available, $day['slots'][$green]) ?></span>
                             <?php elseif ($events): ?>
                                 <?= $this->escapeHtml(implode(', ', $events)) ?>
-                                <span class="green-cell-rinks"><?= $this->t('No rinks available') ?></span>
+                                <span class="green-cell-rinks"><?= $this->t('No slots free') ?></span>
                             <?php else: ?>
                                 <?= $this->t('Fully booked') ?>
-                                <span class="green-cell-rinks"><?= $this->t('No rinks available') ?></span>
+                                <span class="green-cell-rinks"><?= $this->t('No slots free') ?></span>
                             <?php endif; ?>
                         </a>
                     <?php endif; ?>

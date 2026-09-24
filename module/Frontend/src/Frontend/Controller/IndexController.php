@@ -107,49 +107,90 @@ class IndexController extends AbstractActionController
         $bookings = $serviceManager->get('Booking\Manager\BookingManager')->getByReservations($reservations);
         $serviceManager->get('User\Manager\UserManager')->getByBookings($bookings);
 
-        $bookingsBySquare = array();
-
-        foreach ($reservations as $reservation) {
-            $booking = $reservation->getExtra('booking');
-
-            if ($booking && $booking->need('status') != 'cancelled') {
-                $bookingsBySquare[$booking->need('sid')][] = array('reservation' => $reservation, 'booking' => $booking);
-            }
-        }
-
         $greens = $greenManager->getGreens();
 
         $dayStart = clone $date;
         $dayEnd = (clone $date)->modify('+1 day');
 
-        $eventsBySquare = array();
+        /* Everything on a rink that day as [start sec, end sec, booking, event name] */
+        $entries = array();
+
+        foreach ($reservations as $reservation) {
+            $booking = $reservation->getExtra('booking');
+
+            if ($booking && $booking->need('status') != 'cancelled') {
+                $entries[$booking->need('sid')][] = array(
+                    $this->secondsOfDay($reservation->need('time_start')),
+                    $this->secondsOfDay($reservation->need('time_end')),
+                    $booking,
+                    null,
+                );
+            }
+        }
 
         foreach ($serviceManager->get('Event\Manager\EventManager')->getInRange($dayStart, $dayEnd) as $event) {
             if ($event->need('status') != 'enabled') {
                 continue;
             }
 
-            $entry = array(
-                'name' => $event->getMeta('name'),
-                'start' => max(new DateTime($event->need('datetime_start')), $dayStart),
-                'end' => min(new DateTime($event->need('datetime_end')), $dayEnd),
-            );
+            $start = max(new DateTime($event->need('datetime_start')), $dayStart)->getTimestamp() - $dayStart->getTimestamp();
+            $end = min(new DateTime($event->need('datetime_end')), $dayEnd)->getTimestamp() - $dayStart->getTimestamp();
 
             foreach ($greens as $squares) {
                 foreach ($squares as $sid => $square) {
                     if ($greenManager->eventCoversSquare($event, $square)) {
-                        $eventsBySquare[$sid][] = $entry;
+                        $entries[$sid][] = array($start, $end, null, (string) $event->getMeta('name'));
                     }
                 }
             }
+        }
+
+        /* Per green: its time slots, and per rink and slot the bookings and event names in it */
+        $sheet = array();
+
+        foreach ($greens as $green => $squares) {
+            $slots = array();
+
+            foreach ($squares as $square) {
+                $timeEnd = $this->secondsOfDay($square->need('time_end'));
+                $timeBlock = max(60, (int) $square->need('time_block'));
+
+                for ($slotStart = $this->secondsOfDay($square->need('time_start')); $slotStart < $timeEnd; $slotStart += $timeBlock) {
+                    $slots[$slotStart] = array($slotStart, min($slotStart + $timeBlock, $timeEnd));
+                }
+            }
+
+            ksort($slots);
+            $slots = array_values($slots);
+
+            $rows = array();
+
+            foreach ($squares as $sid => $square) {
+                foreach ($slots as $index => list($slotStart, $slotEnd)) {
+                    $cell = array('bookings' => array(), 'events' => array());
+
+                    foreach ($entries[$sid] ?? array() as list($start, $end, $booking, $eventName)) {
+                        if ($start < $slotEnd && $end > $slotStart) {
+                            if ($booking) {
+                                $cell['bookings'][] = $booking;
+                            } else {
+                                $cell['events'][$eventName] = $eventName;
+                            }
+                        }
+                    }
+
+                    $rows[$sid][$index] = $cell;
+                }
+            }
+
+            $sheet[$green] = array('slots' => $slots, 'rows' => $rows);
         }
 
         $viewModel = new ViewModel(array(
             'date' => $date,
             'greens' => $greens,
             'closed' => $greenManager->getClosedOn($date),
-            'bookingsBySquare' => $bookingsBySquare,
-            'eventsBySquare' => $eventsBySquare,
+            'sheet' => $sheet,
         ));
 
         $viewModel->setTemplate('frontend/index/day-sheet');
@@ -195,20 +236,23 @@ class IndexController extends AbstractActionController
         for ($i = 0; $i < 14; $i++) {
             if (! $squareValidator->isDayHidden($day)) {
                 $available = array();
+                $slots = array();
                 $eventNames = array();
 
                 foreach ($greens as $green => $squares) {
                     $available[$green] = 0;
+                    $slots[$green] = 0;
                     $eventNames[$green] = $this->eventNamesFor($blocked, $squares, $day->getTimestamp(), $greenManager);
 
                     foreach ($squares as $square) {
-                        if ($this->isRinkAvailable($square, $day->getTimestamp(), $occupancy[$day->format('Y-m-d')][$square->need('sid')] ?? array(), $blocked, $now, $greenManager)) {
-                            $available[$green]++;
-                        }
+                        list($free, $total) = $this->countFreeSlots($square, $day->getTimestamp(), $occupancy[$day->format('Y-m-d')][$square->need('sid')] ?? array(), $blocked, $now, $greenManager);
+
+                        $available[$green] += $free;
+                        $slots[$green] += $total;
                     }
                 }
 
-                $days[] = array('date' => clone $day, 'closed' => $greenManager->getClosedOn($day), 'available' => $available, 'events' => $eventNames);
+                $days[] = array('date' => clone $day, 'closed' => $greenManager->getClosedOn($day), 'available' => $available, 'slots' => $slots, 'events' => $eventNames);
             }
 
             $day->modify('+1 day');
@@ -285,16 +329,19 @@ class IndexController extends AbstractActionController
         return array_values($names);
     }
 
-    /* A rink is available when at least one of its time slots that day has not started and can still be booked. */
-    protected function isRinkAvailable($square, $dayTimestamp, array $taken, array $blocked, $now, GreenManager $greenManager)
+    /* @return array [free, total] time slots of the rink that day; a slot is free when it has not started and can still be booked */
+    protected function countFreeSlots($square, $dayTimestamp, array $taken, array $blocked, $now, GreenManager $greenManager)
     {
         $capacity = (int) $square->need('capacity');
         $capacityHeterogenic = $square->need('capacity_heterogenic');
         $timeBlock = (int) $square->need('time_block');
         $timeEnd = $square->needExtra('time_end_sec');
+        $free = 0;
+        $total = 0;
 
         for ($slotStart = $square->needExtra('time_start_sec'); $slotStart < $timeEnd; $slotStart += $timeBlock) {
             $slotEnd = $slotStart + $timeBlock;
+            $total++;
 
             if ($dayTimestamp + $slotStart <= $now) {
                 continue;
@@ -315,11 +362,18 @@ class IndexController extends AbstractActionController
             }
 
             if ($quantity < $capacity && ! ($quantity && ! $capacityHeterogenic)) {
-                return true;
+                $free++;
             }
         }
 
-        return false;
+        return array($free, $total);
+    }
+
+    protected function secondsOfDay($time)
+    {
+        list($hours, $minutes) = explode(':', $time);
+
+        return $hours * 3600 + $minutes * 60;
     }
 
     protected function greensCsrf()
