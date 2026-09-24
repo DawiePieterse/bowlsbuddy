@@ -66,7 +66,7 @@ class User extends AbstractEntity
     {
         $gender = $this->getMeta('gender');
 
-        if (is_null($gender)) {
+        if (is_null($gender) || $gender === '-') {
             return $default;
         }
 

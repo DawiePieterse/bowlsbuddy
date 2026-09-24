@@ -154,10 +154,6 @@ class UserController extends AbstractActionController
                         $user->setMeta('lastname', $eud['euf-lastname']);
                 }
 
-                $user->setMeta('street', $eud['euf-street']);
-                $user->setMeta('zip', $eud['euf-zip']);
-                $user->setMeta('city', $eud['euf-city']);
-                $user->setMeta('phone', $eud['euf-phone']);
                 $user->setMeta('birthdate', $eud['euf-birthdate']);
                 $user->setMeta('notes', $eud['euf-notes']);
 
@@ -191,10 +187,6 @@ class UserController extends AbstractActionController
                     'euf-gender' => $user->getMeta('gender'),
                     'euf-firstname' => $user->getMeta('firstname', $user->getMeta('name')),
                     'euf-lastname' => $user->getMeta('lastname'),
-                    'euf-street' => $user->getMeta('street'),
-                    'euf-zip' => $user->getMeta('zip'),
-                    'euf-city' => $user->getMeta('city'),
-                    'euf-phone' => $user->getMeta('phone'),
                     'euf-birthdate' => $user->getMeta('birthdate'),
                     'euf-notes' => $user->getMeta('notes'),
                 ));

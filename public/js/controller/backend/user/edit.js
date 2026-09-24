@@ -8,7 +8,6 @@
         var lastnameInput = $("#euf-lastname");
         var firstnameInputOriginal = firstnameInput.width();
 
-        var phoneInput = $("#euf-phone");
         var birthdateInput = $("#euf-birthdate");
 
         var genericLabel = $("#euf-generic-label").text();
@@ -27,7 +26,7 @@
             var gender = $("#euf-gender");
 
             if (gender.val() === "family" || gender.val() === "firm") {
-                firstnameInput.css("width", phoneInput.css("width"));
+                firstnameInput.css("width", "250px");
                 lastnameInput.hide();
                 birthdateInput.parents("tr").hide();
                 firstnameLabel.html(genericLabel);

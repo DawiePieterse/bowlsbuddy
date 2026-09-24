@@ -386,31 +386,6 @@ class AccountController extends AbstractActionController
             $editEmailForm->get('eef-email2')->setValue($user->get('email'));
         }
 
-        /* Notifications form */
-
-        $editNotificationsForm = $formElementManager->get('User\Form\EditNotificationsForm');
-
-        if ($this->getRequest()->isPost() && $editParam == 'notifications') {
-            $editNotificationsForm->setData($this->params()->fromPost());
-
-            if ($editNotificationsForm->isValid()) {
-                $data = $editNotificationsForm->getData();
-
-                $bookingNotifications = $data['enf-booking-notifications'];
-
-                $user->setMeta('notification.bookings', $bookingNotifications);
-
-                $userManager->save($user);
-
-                $this->flashMessenger()->addSuccessMessage(sprintf($this->t('Your %snotification settings%s have been updated'),
-                    '<b>', '</b>'));
-
-                return $this->redirect()->toRoute('user/settings');
-            }
-        } else {
-            $editNotificationsForm->get('enf-booking-notifications')->setValue($user->getMeta('notification.bookings', 'true'));
-        }
-
         /* Password form */
 
         $editPasswordForm = $formElementManager->get('User\Form\EditPasswordForm');
@@ -483,7 +458,6 @@ class AccountController extends AbstractActionController
         return array(
             'user' => $user,
             'editEmailForm' => $editEmailForm,
-            'editNotificationsForm' => $editNotificationsForm,
             'editPasswordForm' => $editPasswordForm,
             'deleteAccountForm' => $deleteAccountForm,
             'deleteAccountMessage' => $deleteAccountMessage,
