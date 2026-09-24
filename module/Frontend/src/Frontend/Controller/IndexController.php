@@ -97,18 +97,36 @@ class IndexController extends AbstractActionController
 
         $greens = $greenManager->getGreens();
 
+        $rangeStart = new DateTime('today');
+        $rangeEnd = new DateTime('today +14 days');
+
+        $reservationManager = $serviceManager->get('Booking\Manager\ReservationManager');
+        $reservations = $reservationManager->getInRange($rangeStart, $rangeEnd);
+        $serviceManager->get('Booking\Manager\BookingManager')->getByReservations($reservations);
+        $events = $serviceManager->get('Event\Manager\EventManager')->getInRange($rangeStart, $rangeEnd);
+
+        $occupancy = $this->collectOccupancy($reservations);
+
         $days = array();
-        $day = new DateTime('today');
+        $day = clone $rangeStart;
 
         for ($i = 0; $i < 14; $i++) {
             if (! $this->isDayHidden($day)) {
                 $closed = array();
+                $available = array();
 
                 foreach ($greens as $green => $squares) {
                     $closed[$green] = $greenManager->isClosed($green, $day);
+                    $available[$green] = 0;
+
+                    foreach ($squares as $square) {
+                        if ($this->isRinkAvailable($square, $day, $occupancy, $events)) {
+                            $available[$green]++;
+                        }
+                    }
                 }
 
-                $days[] = array('date' => clone $day, 'closed' => $closed);
+                $days[] = array('date' => clone $day, 'closed' => $closed, 'available' => $available);
             }
 
             $day->modify('+1 day');
@@ -126,6 +144,81 @@ class IndexController extends AbstractActionController
         $viewModel->setTemplate('frontend/index/greens');
 
         return $viewModel;
+    }
+
+    /* @return array date => sid => list of [start sec, end sec, quantity] of active public bookings */
+    protected function collectOccupancy(array $reservations)
+    {
+        $occupancy = array();
+
+        foreach ($reservations as $reservation) {
+            $booking = $reservation->getExtra('booking');
+
+            if (! $booking || $booking->need('status') == 'cancelled' || $booking->need('visibility') != 'public') {
+                continue;
+            }
+
+            $occupancy[$reservation->need('date')][$booking->need('sid')][] = array(
+                $this->timeToSeconds($reservation->need('time_start')),
+                $this->timeToSeconds($reservation->need('time_end')),
+                (int) $booking->need('quantity'),
+            );
+        }
+
+        return $occupancy;
+    }
+
+    /* A rink is available when at least one of its time slots that day has not started and can still be booked. */
+    protected function isRinkAvailable($square, DateTime $day, array $occupancy, array $events)
+    {
+        $sid = $square->need('sid');
+        $capacity = (int) $square->need('capacity');
+        $capacityHeterogenic = $square->need('capacity_heterogenic');
+        $timeBlock = (int) $square->need('time_block');
+        $now = new DateTime();
+
+        $taken = $occupancy[$day->format('Y-m-d')][$sid] ?? array();
+
+        for ($slotStart = $this->timeToSeconds($square->need('time_start')); $slotStart < $this->timeToSeconds($square->need('time_end')); $slotStart += $timeBlock) {
+            $slotEnd = $slotStart + $timeBlock;
+
+            $slotStartDateTime = (clone $day)->modify('+' . $slotStart . ' sec');
+            $slotEndDateTime = (clone $day)->modify('+' . $slotEnd . ' sec');
+
+            if ($slotStartDateTime <= $now) {
+                continue;
+            }
+
+            foreach ($events as $event) {
+                if ((is_null($event->get('sid')) || $event->get('sid') == $sid) &&
+                    new DateTime($event->need('datetime_start')) < $slotEndDateTime &&
+                    new DateTime($event->need('datetime_end')) > $slotStartDateTime) {
+
+                    continue 2;
+                }
+            }
+
+            $quantity = 0;
+
+            foreach ($taken as list($takenStart, $takenEnd, $takenQuantity)) {
+                if ($takenStart < $slotEnd && $takenEnd > $slotStart) {
+                    $quantity += $takenQuantity;
+                }
+            }
+
+            if ($quantity < $capacity && ! ($quantity && ! $capacityHeterogenic)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function timeToSeconds($time)
+    {
+        $parts = explode(':', $time);
+
+        return $parts[0] * 3600 + $parts[1] * 60 + ($parts[2] ?? 0);
     }
 
     protected function greensCsrf()

@@ -45,16 +45,22 @@ $this->setup(array(
 
             <?php foreach ($this->greens as $green => $squares): ?>
                 <?php $closed = $day['closed'][$green]; ?>
+                <?php $available = $day['available'][$green]; ?>
                 <td>
                     <?php if ($closed): ?>
                         <div class="green-cell green-cell-closed"><?= $this->t('Closed') ?></div>
                     <?php else: ?>
-                        <a class="green-cell green-cell-open" href="<?= $this->url('frontend', [], ['query' => [
+                        <a class="green-cell <?= $available ? 'green-cell-open' : 'green-cell-full' ?>" href="<?= $this->url('frontend', [], ['query' => [
                             'date' => $date->format('Y-m-d'),
                             'squares' => implode(',', array_keys($squares)),
                         ]]) ?>">
-                            <?= $this->t('Open') ?>
-                            <span class="green-cell-rinks"><?= sprintf($this->t('%s rinks'), count($squares)) ?></span>
+                            <?php if ($available): ?>
+                                <?= $this->t('Open') ?>
+                                <span class="green-cell-rinks"><?= sprintf($this->t('%s of %s rinks available'), $available, count($squares)) ?></span>
+                            <?php else: ?>
+                                <?= $this->t('Fully booked') ?>
+                                <span class="green-cell-rinks"><?= $this->t('No rinks available') ?></span>
+                            <?php endif; ?>
                         </a>
                     <?php endif; ?>
 
