@@ -11,7 +11,7 @@ rollback plan. The current code serves as the **reference for how everything sho
 **Decided:** the current app will **not be launched**. It is kept only as the reference, so no fixes are made to it;
 the issues in section 2 are fixed in the rebuild only.
 
-**Status:** proposal. No code has changed yet.
+**Status:** all decisions made (section 12). Ready to start Phase 1.
 
 ---
 
@@ -333,13 +333,13 @@ Laravel is set up for this from Phase 1, so moving hosts later needs no code cha
 
 ---
 
-## 12. Decisions needed
+## 12. Decisions
 
 1. ~~**Framework?**~~ **Decided: Laravel 12 + Filament.**
 2. ~~**Repository?**~~ **Decided: a new repository.** The current `bowlsbuddy` repository is kept unchanged as
    the reference, and archived once the rebuild is live.
 3. ~~**Hosting?**~~ **Decided: InfinityFree** until the first club signs up, then paid hosting (section 9).
-4. **Dropped features:** confirm pricing, products, coupons, bills, emails and repeating bookings can stay
-   out.
+4. ~~**Dropped features?**~~ **Decided: left out.** Payments, pricing, products, coupons, bills, emails and
+   repeating bookings are not built, and their tables are not created.
 5. ~~**The current app:** keep it only as a reference, or launch it at LCE?~~ **Decided: reference only.** It
    won't be launched or fixed; LCE's first live system will be the rebuild.
