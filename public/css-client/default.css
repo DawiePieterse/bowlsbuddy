@@ -77,6 +77,12 @@ a.cc-own .cc-label { white-space: nowrap; overflow: hidden; text-overflow: ellip
     #calendar-toolbar-datepicker { padding-left: 12px; padding-right: 12px; }
 
     #calendar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px; }
+
+    body > .panel,
+    .messages-panel { min-width: 0 !important; max-width: calc(100vw - 16px); box-sizing: border-box; }
+    body > .panel { left: 8px !important; width: calc(100vw - 16px); }
+    a.squarebox-primary-close-link,
+    a.squarebox-primary-close-link:hover { right: 6px; top: 6px; }
     #calendar .calendar-square-col,
     #calendar .calendar-square-table,
     #calendar .calendar-time-col { width: 56px !important; }
