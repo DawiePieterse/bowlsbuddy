@@ -20,7 +20,10 @@ $names = $this->calendarBookingNames();
         .actions { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; }
         .actions a, .actions button { font: inherit; font-size: 14px; padding: 10px 20px; border-radius: 8px; border: 1px solid #d2d2d7; background: #FFF; color: #1d1d1f; text-decoration: none; cursor: pointer; }
         .actions button { background: #0071e3; border-color: #0071e3; color: #FFF; font-weight: 600; }
-        header { border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 18px; }
+        header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 18px; }
+        .qr { text-align: center; flex-shrink: 0; }
+        #qr-code svg { display: block; width: 110px; height: 110px; }
+        .qr-caption { font-size: 10px; color: #6e6e73; margin-top: 4px; }
         header .club { font-size: 13px; color: #6e6e73; text-transform: uppercase; letter-spacing: 1px; }
         header h1 { margin: 4px 0 0; font-size: 24px; }
         h2 { font-size: 17px; margin: 22px 0 8px; }
@@ -52,8 +55,15 @@ $names = $this->calendarBookingNames();
     </div>
 
     <header>
-        <div class="club"><?= $this->escapeHtml($this->option('client.name.full')) ?> &middot; <?= $this->t('Rink bookings') ?></div>
-        <h1><?= $this->escapeHtml($this->dateFormat($date, IntlDateFormatter::FULL)) ?></h1>
+        <div>
+            <div class="club"><?= $this->escapeHtml($this->option('client.name.full')) ?> &middot; <?= $this->t('Rink bookings') ?></div>
+            <h1><?= $this->escapeHtml($this->dateFormat($date, IntlDateFormatter::FULL)) ?></h1>
+        </div>
+
+        <div class="qr">
+            <div id="qr-code" data-url="<?= $this->escapeHtmlAttr($this->serverUrl($this->url('frontend'))) ?>"></div>
+            <div class="qr-caption"><?= $this->t('Scan for live bookings') ?></div>
+        </div>
     </header>
 
     <?php foreach ($this->greens as $green => $squares): ?>
@@ -113,5 +123,16 @@ $names = $this->calendarBookingNames();
     <footer><?= $this->escapeHtml(sprintf($this->t('Printed %s'), $this->dateFormat(new DateTime(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT))) ?></footer>
 
 </div>
+
+<script src="<?= $this->basePath('js/qrcode/qrcode.js') ?>"></script>
+<script>
+    (function () {
+        var container = document.getElementById('qr-code');
+        var qr = qrcode(0, 'M');
+        qr.addData(container.getAttribute('data-url'));
+        qr.make();
+        container.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 4 });
+    })();
+</script>
 </body>
 </html>
