@@ -203,15 +203,20 @@ class BookingController extends AbstractActionController
                 }
 
                 $bookingService = $serviceManager->get('Booking\Service\BookingService');
-                $bookingService->createSingle($user, $square, $quantityParam, $byproducts['dateStart'], $byproducts['dateEnd'], $bills, array(
+                $booking = $bookingService->createSingle($user, $square, $quantityParam, $byproducts['dateStart'], $byproducts['dateEnd'], $bills, array(
                     'player-names' => serialize($playerNames),
                     'notes' => $userNotes,
                     'type' => $type,
                     'custom-name' => $customName,
                 ));
 
+                $booking->setExtra('user', $user);
+
+                $whatsAppShare = $serviceManager->get('ViewRenderer')->plugin('SquareWhatsAppShare');
+
                 $this->flashMessenger()->addSuccessMessage(sprintf($this->t('%sCongratulations:%s Your %s has been booked!'),
-                    '<b>', '</b>', $this->option('subject.square.type')));
+                    '<b>', '</b>', $this->option('subject.square.type'))
+                    . '<br><br>' . $whatsAppShare($booking, $square, $byproducts['dateStart'], $byproducts['dateEnd']));
 
                 return $this->redirectBack()->toOrigin();
             }

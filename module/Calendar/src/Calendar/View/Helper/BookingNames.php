@@ -8,8 +8,18 @@ use Zend\View\Helper\AbstractHelper;
 class BookingNames extends AbstractHelper
 {
 
-    /* @return string escaped "Booker, Player 2, Player 3" */
-    public function __invoke(Booking $booking)
+    /* @return string|self escaped "Booker, Player 2, Player 3", or the helper itself when called without a booking */
+    public function __invoke(?Booking $booking = null)
+    {
+        if (! $booking) {
+            return $this;
+        }
+
+        return $this->getView()->escapeHtml(implode(', ', $this->names($booking)));
+    }
+
+    /* @return array unescaped names of the booker and the additional players */
+    public function names(Booking $booking)
     {
         $names = array($booking->getMeta('custom-name') ?: $booking->needExtra('user')->need('alias'));
 
@@ -23,7 +33,7 @@ class BookingNames extends AbstractHelper
             }
         }
 
-        return $this->getView()->escapeHtml(implode(', ', $names));
+        return $names;
     }
 
 }

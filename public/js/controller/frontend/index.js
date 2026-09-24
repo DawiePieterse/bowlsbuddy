@@ -9,7 +9,7 @@
         var messagesPanel = $(".messages-panel");
         var calendar = $("#calendar");
 
-        if (messagesPanel.length && calendar.length) {
+        if (messagesPanel.length && calendar.length && ! messagesPanel.find(".whatsapp-share").length) {
             messagesPanel.css({
                 "position": "absolute",
                 "z-index": 2048,

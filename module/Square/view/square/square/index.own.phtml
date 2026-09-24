@@ -6,6 +6,15 @@ foreach ($this->bookingsFromUser as $bid => $booking) {
     echo sprintf('<p><span class="green">' . $this->t('This %s has been %sbooked to you%s.') . '</span></p>',
         $squareType, '<b>', '</b>');
 
+    foreach ($this->reservations as $reservation) {
+        if ($reservation->need('bid') == $bid) {
+            echo '<p>' . $this->squareWhatsAppShare($booking, $this->square,
+                new DateTime($reservation->need('date') . ' ' . $reservation->need('time_start')),
+                new DateTime($reservation->need('date') . ' ' . $reservation->need('time_end'))) . '</p>';
+            break;
+        }
+    }
+
     if ($this->validator->isReservationCancellable($booking)) {
         foreach ($this->reservations as $rid => $reservation) {
             if ($reservation->need('bid') == $bid) {

@@ -104,6 +104,7 @@ return array(
             'SquareProductChoice' => 'Square\View\Helper\ProductChoiceFactory',
             'SquareQuantityChoice' => 'Square\View\Helper\QuantityChoiceFactory',
             'SquareTimeBlockChoice' => 'Square\View\Helper\TimeBlockChoiceFactory',
+            'SquareWhatsAppShare' => 'Square\View\Helper\WhatsAppShareFactory',
         ),
     ),
 
