@@ -56,8 +56,6 @@ a.green-cell-open:hover { background-color: #248a3d; }
 
 .cc-green-closed { cursor: default; color: #FFF; background-color: #d70015; font-weight: bold; }
 
-.greens-no-practice { color: #86868b; background-color: #f5f5f7; border-radius: 8px; padding: 12px 8px; font-size: 13px; }
-
 @media (max-width: 768px) {
     #green-heading { margin: 8px; }
 

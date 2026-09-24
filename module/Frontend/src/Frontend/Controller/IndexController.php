@@ -101,13 +101,15 @@ class IndexController extends AbstractActionController
         $day = new DateTime('today');
 
         for ($i = 0; $i < 14; $i++) {
-            $closed = array();
+            if (! $this->isDayHidden($day)) {
+                $closed = array();
 
-            foreach ($greens as $green => $squares) {
-                $closed[$green] = $greenManager->isClosed($green, $day);
+                foreach ($greens as $green => $squares) {
+                    $closed[$green] = $greenManager->isClosed($green, $day);
+                }
+
+                $days[] = array('date' => clone $day, 'closed' => $closed);
             }
-
-            $days[] = array('date' => clone $day, 'practice' => ! $this->isDayHidden($day), 'closed' => $closed);
 
             $day->modify('+1 day');
         }
